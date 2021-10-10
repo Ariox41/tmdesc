@@ -14,31 +14,39 @@ std::ostream& operator<<(std::ostream& out, tmdesc::string_view str) {
 struct print_visitor {
 
     template <class T, std::enable_if_t<tmdesc::has_type_info_v<T>, bool> = true> void operator()(const T& s) const {
+        std::cout << "{";
+        tmdesc::string_view separator = "";
         tmdesc::visit_members(s, [&](auto member_ref) {
+            std::cout << separator;
+            separator = ", ";
+
             constexpr auto info = member_ref.flags().find_flag(tmdesc::type_t<flags::AdditionInfoTag>{});
-            std::cout << member_ref.name();
+            std::cout << '"' << member_ref.name();
             info.if_some([&](auto str) { std::cout << ", " << str; });
-            std::cout << ": ";
+            std::cout << "\": ";
             (*this)(member_ref.get());
-            std::cout << "\n";
         });
+        std::cout << "}";
     }
 
     template <class T> void operator()(const std::vector<T>& vec) const {
         std::cout << "[";
+        tmdesc::string_view separator = "";
         for (const auto& item : vec) {
+            std::cout << separator;
+            separator = ", ";
             (*this)(item);
-            std::cout << ", ";
+            std::cout << "}";
         }
         std::cout << "]";
     }
 
     void operator()(double value) const { std::cout << value; }
-    void operator()(const std::string& value) const { std::cout << value; }
+    void operator()(const std::string& value) const { std::cout << '"' << value << '"'; }
 };
 
 int main() {
-    Curve curve{{"curve 1", ""}};
+    Curve curve{std::string{"curve 1"}, {geometry::Point3{ 1., 2., 3.}, geometry::Point3{ 42., 0., 13.}}};
 
     print_visitor vis;
     vis(curve);
