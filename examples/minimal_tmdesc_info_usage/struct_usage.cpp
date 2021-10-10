@@ -20,10 +20,10 @@ struct print_visitor {
             std::cout << separator;
             separator = ", ";
 
-            constexpr auto info = member_ref.flags().find_flag(tmdesc::type_t<flags::AdditionInfoTag>{});
             std::cout << '"' << member_ref.name();
-            info.if_some([&](auto str) { std::cout << ", " << str; });
-            std::cout << "\": ";
+            constexpr auto info = member_ref.flags().find_flag(tmdesc::type_t<flags::AdditionInfoTag>{});
+            info.if_some([&](auto str) { std::cout << "[" << str << "]"; });
+            std::cout << R"(": )";
             (*this)(member_ref.get());
         });
         std::cout << "}";
@@ -46,7 +46,7 @@ struct print_visitor {
 };
 
 int main() {
-    Curve curve{std::string{"curve 1"}, {geometry::Point3{ 1., 2., 3.}, geometry::Point3{ 42., 0., 13.}}};
+    Curve curve{std::string{"curve 1"}, {geometry::Point3{ 1., 2., 3.}, geometry::Point3{ 42.5, 0.1, 13.}}};
 
     print_visitor vis;
     vis(curve);
