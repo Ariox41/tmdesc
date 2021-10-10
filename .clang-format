@@ -1,0 +1,47 @@
+---
+
+BasedOnStyle: llvm
+
+IndentWidth: 4
+
+---
+
+Language: Cpp
+
+AccessModifierOffset: -4
+
+AlignConsecutiveAssignments: true
+
+AlignConsecutiveDeclarations: false
+
+AlignEscapedNewlinesLeft: true
+
+AllowShortBlocksOnASingleLine: true
+
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: true
+
+AlwaysBreakTemplateDeclarations: false
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+
+BinPackArguments: true
+
+BinPackParameters: true
+
+BreakBeforeTernaryOperators: true
+
+BreakConstructorInitializers: BeforeComma
+
+BreakInheritanceList: BeforeColon
+
+ColumnLimit: 120
+
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+
+IndentWidth: 4
+ConstructorInitializerIndentWidth: 2
+
+PointerAlignment: Left
+
+DerivePointerAlignment: false
