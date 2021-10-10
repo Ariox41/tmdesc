@@ -35,8 +35,8 @@ struct Curve {
 };
 
 template <class Impl> constexpr auto tmdesc_info(tmdesc::type_t<Curve>, tmdesc::info_builder<Impl> build) {
-    return build(build.member("name", &Curve::name),                                      //
-                 build.member("points", &Curve::points,                                   //
+    return build(build.member("name", &Curve::name),                                //
+                 build.member("points", &Curve::points,                             //
                               build.flags(flags::addition_info_flag("a 3D curve"))) //
     );
 }
