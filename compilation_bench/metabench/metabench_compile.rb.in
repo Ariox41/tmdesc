@@ -1,0 +1,15 @@
+require 'benchmark'
+require 'open3'
+require 'fileutils'
+
+command_line = ARGV.join(' ')
+                                                      
+stdout, stderr, status = Open3.capture3(command_line)   
+
+real_command_Line = command_line.delete 'tmdesc_metabench_pattern.cpp'
+
+IO.write('${target}', "#{real_command_Line}")
+          
+$stdout.puts(stdout)                    
+$stderr.puts(stderr)                                             
+exit(status.success?)

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title><%=title%></title>
+    <style>
+        html,
+        body{
+            width: 100%;
+            height: 100%;
+            margin: auto;
+        }
+         
+        #chart_container{
+            width: 99%;
+            height: 99%;
+            margin: 0;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/google-palette/1.1.0/palette.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.1.1/chartjs-plugin-zoom.min.js"></script>
+</head>
+
+<body class='with-3d-shadow with-transitions'>
+    <div id="chart_container">
+        <canvas id="chart"></canvas>
+    </div>
+    <script>
+        Chart.defaults.font.size = 16;
+
+        const srcData = JSON.parse(`<%= "[#{data.join(',')}]"  %>`)
+
+        const borderColors = palette('mpn65', srcData.length).map(function (hex) {
+            return '#' + hex;
+        })
+        const backgroundColors = palette('mpn65' /*'tol-sq'*/, srcData.length).map(function (hex) {
+            return '#' + hex;
+        })
+
+        function strsort(x, y){
+            return (x < y? -1: (x > y? 1: 0))
+        }
+
+        let labels = []
+        const datasets = srcData.map((item, i) => {
+            labels = labels.concat(item.range)
+            const dataArray = item.data.sort((a,b) => strsort(a.input, b.input))
+            const lineData = dataArray.map(item => {
+                const itemData = item.base_times.map((base, i)=>{ return {base: base, total: item.total_times[i]}})
+                const mean = itemData.map(item => item.total - item.base).reduce((a, b) => a + b, 0) / itemData.length
+                const baseMin =  Math.min.apply(Math, item.base_times);
+                const baseMax =  Math.max.apply(Math, item.base_times);
+                const totalMin =  Math.min.apply(Math, item.total_times);
+                const totalMax =  Math.max.apply(Math, item.total_times);
+                
+                return {
+                    x: item.input,
+                    y: mean,
+                    yMin: Math.min(mean, totalMax - baseMin),
+                    yMax: Math.max(mean, totalMin - baseMax)
+                }
+            })
+            return {
+                label: item.name,
+                data: lineData,
+                borderColor: borderColors[i],
+                backgroundColor: backgroundColors[i] 
+            }
+        })
+
+        
+        const data = {
+          labels:  Array.from(new Set(labels)).sort(strsort),
+          datasets: datasets
+        }
+
+        const title = `<%=title%>`
+        const x_axis = `<%=x_axis%>`
+        const y_axis = `<%=y_axis%>`
+
+        let plugins = {
+            tooltip : {
+                itemSort: (a,b) => strsort(b.parsed.y, a.parsed.y)
+            },
+            legend: {
+                position: 'bottom'
+            },
+            zoom:{
+                pan: {
+                    enabled: true
+                },
+                zoom: {
+                    wheel: {
+                        enabled: true,
+                    },
+                    pinch: {
+                        enabled: false
+                    },
+                    mode: 'y'
+                }
+            }
+        }
+        if(title != ""){
+            plugins.title = {display: true, text: title}
+        }
+
+        let scales = {}        
+        if(x_axis != ""){
+            scales.x =  { 
+                display: true,
+                title: {
+                    display: true,
+                    text: x_axis
+                }
+            }
+        }
+        if(y_axis != ""){
+            scales.y =  { 
+                display: true,
+                title: {
+                    display: true,
+                    text: y_axis
+                }
+            }
+        }
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'x',
+                    intersect: false,
+                },
+                plugins: plugins, 
+                scales: scales
+            }
+        }
+        var chart = new Chart(
+            document.getElementById('chart'),
+            config
+        );
+    </script>
+</body>
+
+</html>

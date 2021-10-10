@@ -1,0 +1,74 @@
+#include <tmdesc/functional/invoke.hpp>
+#include <tmdesc/meta/helpers.hpp>
+#include <tmdesc/tuple/tuple.hpp>
+#include <utility>
+
+namespace bench {
+template <std::size_t I, class T> constexpr const T& get_impl(const ::tmdesc::detail::tuple_item<I, T>& e) noexcept {
+    return e.value;
+}
+template <std::size_t I, class T> constexpr T& get_impl(::tmdesc::detail::tuple_item<I, T>& e) noexcept {
+    return e.value;
+}
+template <std::size_t I, class T> constexpr T&& get_impl(::tmdesc::detail::tuple_item<I, T>&& e) noexcept {
+    return e.value;
+}
+
+// faster than overload
+template <std::size_t I, class Tuple,
+          std::enable_if_t<::tmdesc::is_tuple_v<::tmdesc::meta::remove_cvref_t<Tuple>>, bool> = true>
+constexpr decltype(auto) get(Tuple&& t) noexcept {
+    return ::bench::get_impl<I>(std::forward<Tuple>(t));
+}
+
+template <class Tuple, class Fn, std::size_t... I>
+constexpr void tuple_foreach_impl(Tuple&& t, Fn&& fn, std::index_sequence<I...>) noexcept(
+    ::tmdesc::meta::fast_and({noexcept(::tmdesc::invoke(std::declval<Fn>(), ::bench::get<I>(std::declval<Tuple>())))...})) {
+    (void)std::initializer_list<bool>{
+        true, ((void)::tmdesc::invoke(std::forward<Fn>(fn), ::bench::get<I>(std::forward<Tuple>(t))), void(), true)...};
+}
+
+template <class Tuple, class Fn>
+constexpr void tuple_foreach(Tuple&& t, Fn&& fn) noexcept(noexcept(
+    tuple_foreach_impl(std::declval<Tuple>(), std::declval<Fn>(), ::tmdesc::index_sequence_for_tuple<Tuple>{}))) {
+    return tuple_foreach_impl(std::forward<Tuple>(t), std::forward<Fn>(fn),
+                              ::tmdesc::index_sequence_for_tuple<Tuple>{});
+}
+
+struct add {
+    int& acc;
+    template <class T> constexpr void operator()(const T& v) const noexcept { acc += v.value + v.index; }
+};
+struct sub {
+    int& acc;
+    template <class T> constexpr void operator()(const T& v) const noexcept { acc -= v.value + v.index; }
+};
+
+template <class Tuple> constexpr int calc_sum(const Tuple& t) noexcept {
+    int i = 0;
+    tuple_foreach(t, add{i});
+    return i;
+}
+template <class Tuple> constexpr int calc_sub2(const Tuple& t) noexcept {
+    int i = 0;
+    tuple_foreach(t, sub{i});
+    return i;
+}
+} // namespace bench
+template <std::size_t I> struct Value {
+    static constexpr int index = I;
+    int value;
+};
+int main() {
+    constexpr auto t =
+        tmdesc::make_tuple(<%= (1.. @item).map{ | i | "Value<" + i.to_s + ">{" + (i * 7).to_s + "}"}.join(', ') %>);
+#ifdef METABENCH
+    static_assert(noexcept(bench::calc_sum(t)), "");
+    static_assert(noexcept(bench::calc_sub2(t)), "");
+    constexpr int sum = bench::calc_sum(t);
+    constexpr int sub = bench::calc_sub2(t);
+    static_assert(sum == <%= (1.. @item).inject(0){ | acc, i | acc + i * 8} %>, "bench impl error");
+    static_assert(sub == <%= (1.. @item).inject(0){ | acc, i | acc - i * 8} %>, "bench impl error");
+#endif
+    return sizeof(t);
+}

@@ -1,0 +1,70 @@
+// Copyright Victor Smirnov 2021
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+
+#pragma once
+#include "../../meta/helpers.hpp"
+namespace tmdesc {
+
+namespace detail {
+
+template <std::size_t I, class T> struct tuple_item {
+    static constexpr std::size_t index = I;
+    using type                         = T;
+    T value;
+};
+
+template <class Indexer, class... Ts> struct tuple_impl;
+
+template <> struct tuple_impl<std::index_sequence<>> {};
+template <std::size_t... Is, class... Ts>
+struct tuple_impl<std::index_sequence<Is...>, Ts...> : public tuple_item<Is, Ts>... {
+protected:
+    using self_t = tuple_impl<std::index_sequence<Is...>, Ts...>;
+
+    tuple_impl()                  = default;
+    tuple_impl(tuple_impl&&)      = default;
+    tuple_impl(const tuple_impl&) = default;
+    tuple_impl& operator=(tuple_impl&&) = default;
+    tuple_impl& operator=(const tuple_impl&) = default;
+
+public:
+    template <class... Args, std::enable_if_t<meta::conjunction_v<std::is_constructible<Ts, Args>...>, bool> = true>
+    constexpr tuple_impl(Args&&... args) noexcept(meta::fast_and({std::is_nothrow_constructible<Ts, Args&&>::value...}))
+      : tuple_item<Is, Ts>{std::forward<Args>(args)}... {}
+};
+
+struct getter_for_tuple_t {
+    template <std::size_t I, class T> static constexpr const T& get_by_id(const tuple_item<I, T>& e) noexcept {
+        return e.value;
+    }
+    template <std::size_t I, class T> static constexpr T& get_by_id(tuple_item<I, T>& e) noexcept { return e.value; }
+    template <std::size_t I, class T> static constexpr T&& get_by_id(tuple_item<I, T>&& e) noexcept {
+        return std::move(e).value;
+    }
+    template <std::size_t I, class T> static constexpr T&& get_by_id(const tuple_item<I, T>&& e) noexcept {
+        return std::move(e).value;
+    }
+
+    template <class T, std::size_t I> static constexpr const T& get_by_type(const tuple_item<I, T>& e) noexcept {
+        return e.value;
+    }
+    template <class T, std::size_t I> static constexpr T& get_by_type(tuple_item<I, T>& e) noexcept { return e.value; }
+    template <class T, std::size_t I> static constexpr T&& get_by_type(tuple_item<I, T>&& e) noexcept {
+        return std::move(e).value;
+    }
+    template <class T, std::size_t I> static constexpr T&& get_by_type(const tuple_item<I, T>&& e) noexcept {
+        return std::move(e).value;
+    }
+
+private:
+    template <std::size_t I, class T>
+    static detail::tuple_item<I, T> get_element_type(const tuple_item<I, T>&) noexcept;
+
+public:
+    template <std::size_t I, class Tuple>
+    using tuple_element = decltype(get_element_type<I>(std::declval<const Tuple&>()));
+};
+
+} // namespace detail
+} // namespace tmdesc
