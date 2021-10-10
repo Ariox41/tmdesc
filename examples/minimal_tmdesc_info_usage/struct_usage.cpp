@@ -3,8 +3,8 @@
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 
 #include "struct_declaration.hpp"
-#include "tmdesc/members_visitation.hpp"
 #include <iostream>
+#include <tmdesc/members_visitation.hpp>
 
 std::ostream& operator<<(std::ostream& out, tmdesc::string_view str) {
     out.write(str.data(), str.size());
@@ -12,8 +12,8 @@ std::ostream& operator<<(std::ostream& out, tmdesc::string_view str) {
 }
 
 struct print_visitor {
-
-    template <class T, std::enable_if_t<tmdesc::has_type_info_v<T>, bool> = true> void operator()(const T& s) const {
+    template <class T, std::enable_if_t<tmdesc::has_type_info_v<T>, bool> = true> //
+    void operator()(const T& s) const {
         std::cout << "{";
         tmdesc::string_view separator = "";
         tmdesc::visit_members(s, [&](auto member_ref) {
@@ -45,9 +45,10 @@ struct print_visitor {
 };
 
 int main() {
-    Curve curve{std::string{"curve 1"}, {geometry::Point3{ 1., 2., 3.}, geometry::Point3{ 42.5, 0.1, 13.}}};
+    Curve curve{std::string{"curve 1"}, {geometry::Point3{1., 2., 3.}, geometry::Point3{42.5, 0.1, 13.}}};
 
-    print_visitor vis;
-    vis(curve);
+    print_visitor print;
+    print(curve);
+    std::cout << std::endl;
     return 0;
 }
