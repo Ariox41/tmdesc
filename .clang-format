@@ -43,5 +43,4 @@ IndentWidth: 4
 ConstructorInitializerIndentWidth: 2
 
 PointerAlignment: Left
-
 DerivePointerAlignment: false
