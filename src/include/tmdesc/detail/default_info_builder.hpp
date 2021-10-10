@@ -80,6 +80,8 @@ template <class T> constexpr auto type_info_v = tmdesc_info(type_t<T>{}, info_bu
 } // namespace detail
 
 template <class T> constexpr auto type_members_info_v = detail::type_info_v<T>.members();
+template <class T> using type_members_info_t = meta::remove_cvref_t<decltype (type_members_info_v<T>)>;
+
 template <class T> constexpr auto type_flags_v        = detail::type_info_v<T>.flags();
 
 template <class T, class = void> struct has_type_info : std::false_type {};

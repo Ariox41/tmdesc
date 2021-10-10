@@ -10,10 +10,10 @@ template <template <class...> class Consumer> struct tuple_transform_t {
 private:
     template <class Tuple, class Fn, std::size_t... I>
     static constexpr decltype(auto) transform(Tuple&& t, Fn&& fn, std::index_sequence<I...>) noexcept(
-        noexcept(Consumer<invoke_result_t<Fn, tuple_get_result_t<I, Tuple&&>>...>{
-            invoke(std::declval<Fn>(), std::declval<tuple_get_result_t<I, Tuple&&>>())...})) {
+        noexcept(Consumer<invoke_result_t<Fn&, tuple_get_result_t<I, Tuple&&>>...>{
+            invoke(std::declval<Fn&>(), std::declval<tuple_get_result_t<I, Tuple&&>>())...})) {
         return Consumer<invoke_result_t<Fn, tuple_get_result_t<I, Tuple&&>>...>{
-            invoke(std::forward<Fn>(fn), get<I>(std::forward<Tuple>(t)))...};
+            invoke(static_cast<Fn&>(fn), get<I>(std::forward<Tuple>(t)))...};
     }
 
 public:
@@ -30,10 +30,12 @@ constexpr tuple_transform_t<tuple> tuple_transform{};
 template <template <class...> class Consumer> struct tuple_transform2_t {
 private:
     template <class Tuple1, class Tuple2, class Fn, std::size_t... I>
-    static decltype(auto) transform(Tuple1&& t1, Tuple2&& t2, Fn&& fn, std::index_sequence<I...>) {
-        return Consumer<decltype(invoke(std::declval<Fn>(), get<I>(std::declval<Tuple1>()),
-                                        get<I>(std::declval<Tuple2>())))...>{
-            invoke(std::forward<Fn>(fn), get<I>(std::forward<Tuple1>(t1)), get<I>(std::forward<Tuple2>(t2)))...};
+    static decltype(auto) transform(Tuple1&& t1, Tuple2&& t2, Fn&& fn, std::index_sequence<I...>) noexcept(
+        Consumer<invoke_result_t<Fn&, tuple_get_result_t<I, Tuple1&&>, tuple_get_result_t<I, Tuple2&&>>...>{
+            invoke(std::declval<Fn&>(), std::declval<tuple_get_result_t<I, Tuple1&&>>(),
+                   std::declval<tuple_get_result_t<I, Tuple2&&>>())...}) {
+        return Consumer<invoke_result_t<Fn&, tuple_get_result_t<I, Tuple1&&>, tuple_get_result_t<I, Tuple2&&>>...>{
+            invoke(static_cast<Fn&>(fn), get<I>(std::forward<Tuple1>(t1)), get<I>(std::forward<Tuple2>(t2)))...};
     }
 
 public:

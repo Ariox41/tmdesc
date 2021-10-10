@@ -12,10 +12,10 @@ private:
     struct impl_t {
         template <class Tuple, class Fn, std::size_t... I>
         constexpr void operator()(Tuple&& t, Fn&& fn, std::index_sequence<I...>) const
-            noexcept(::tmdesc::meta::fast_and({noexcept(::tmdesc::invoke(std::declval<Fn>(),
+            noexcept(::tmdesc::meta::fast_and({noexcept(::tmdesc::invoke(std::declval<Fn&>(),
                                                                          get<I>(std::declval<Tuple>())))...})) {
             (void)std::initializer_list<bool>{
-                true, ((void)::tmdesc::invoke(std::forward<Fn>(fn), get<I>(std::forward<Tuple>(t))), void(), true)...};
+                true, ((void)::tmdesc::invoke(static_cast<Fn&>(fn), get<I>(std::forward<Tuple>(t))), void(), true)...};
         }
     };
 
@@ -34,9 +34,9 @@ private:
         template <class Tuple1, class Tuple2, class Fn, std::size_t... I>
         constexpr void operator()(Tuple1&& t1, Tuple2&& t2, Fn&& fn, std::index_sequence<I...>) const
             noexcept(::tmdesc::meta::fast_and({noexcept(::tmdesc::invoke(
-                std::declval<Fn>(), get<I>(std::declval<Tuple1>()), get<I>(std::declval<Tuple2>())))...})) {
+                std::declval<Fn&>(), get<I>(std::declval<Tuple1>()), get<I>(std::declval<Tuple2>())))...})) {
             (void)std::initializer_list<bool>{
-                true, ((void)::tmdesc::invoke(std::forward<Fn>(fn), get<I>(std::forward<Tuple1>(t1)),
+                true, ((void)::tmdesc::invoke(static_cast<Fn&>(fn), get<I>(std::forward<Tuple1>(t1)),
                                               get<I>(std::forward<Tuple2>(t2))),
                        void(), true)...};
         }

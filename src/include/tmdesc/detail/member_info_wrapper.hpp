@@ -26,7 +26,7 @@ private:
 public:
     using member_type = MemberType;
 
-    constexpr member_info_pack(zstring_view name, member_ptr_type memptr)
+    constexpr member_info_pack(zstring_view name, MemberType OwnerType::* memptr)
       : member_name(name)
       , member_ptr(memptr) {}
 
@@ -48,12 +48,11 @@ private:
 template <class MemberType, class OwnerType, class... Flags>
 struct full_member_info_pack : public member_info_pack<MemberType, OwnerType> {
     using super_t         = member_info_pack<MemberType, OwnerType>;
-    using member_ptr_type = typename super_t::member_ptr_type;
 
     const flag_map<Flags...> flags_;
 
 public:
-    constexpr full_member_info_pack(zstring_view name, member_ptr_type memptr, flag_map<Flags...> flags)
+    constexpr full_member_info_pack(zstring_view name, MemberType OwnerType::* memptr, flag_map<Flags...> flags)
       : super_t(name, memptr)
       , flags_(flags) {}
 
