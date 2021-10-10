@@ -36,7 +36,6 @@ struct print_visitor {
             std::cout << separator;
             separator = ", ";
             (*this)(item);
-            std::cout << "}";
         }
         std::cout << "]";
     }
