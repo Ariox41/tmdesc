@@ -33,3 +33,6 @@
 
 # QtCreator config file
 *.user
+
+# default build dirrectory
+/build/*
