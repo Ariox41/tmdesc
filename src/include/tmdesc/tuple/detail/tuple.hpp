@@ -57,13 +57,11 @@ struct getter_for_tuple_t {
         return std::move(e).value;
     }
 
-private:
     template <std::size_t I, class T>
-    static detail::tuple_item<I, T> get_element_type(const tuple_item<I, T>&) noexcept;
+    static detail::tuple_item<I, T> tuple_element_impl(const tuple_item<I, T>&) noexcept;
 
-public:
     template <std::size_t I, class Tuple>
-    using tuple_element = decltype(get_element_type<I>(std::declval<const Tuple&>()));
+    using tuple_element = decltype(tuple_element_impl<I>(std::declval<const Tuple&>()));
 };
 
 } // namespace detail
