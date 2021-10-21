@@ -1,6 +1,10 @@
 // Copyright Victor Smirnov 2021
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+//
+// This file is intended to describe the members of a type 
+// without significantly increasing compilation time.
+// Such a description can be considered a forward declaration.
 
 #pragma once
 
@@ -12,7 +16,31 @@ namespace tmdesc {
 template <class T> struct type_t : public meta::type_t<T> {};
 template <class Tag, class Flag> struct flag { Flag flag; };
 
-template <class Impl> struct member_info_wrapper;
+/// The member_info_pack implementation can provide one or more methods from:
+/// const T& get(const S& object) const [noexcept];
+/// T& get(S& object) const [noexcept];
+/// T&& get(S&& object) const [noexcept];
+///
+/// The custom `set' method is not provided for performance reasons. 
+/// In the future, proxy object support may be added instead.
+template <class Impl> struct  member_info_pack: public Impl {
+    using Impl::Impl;
+    using Impl::operator=;
+
+    /// \return reference to member of object, or proxy-object
+    /// \note not a static function
+    using Impl::get;
+
+    /// \return constexpr zstring_view to member name
+    /// \note not a static function
+    using Impl::name;
+
+    /// \return constexpr flag_map</*...*/> for member
+    /// \note not a static function
+    using Impl::flags;
+};
+
+// see flag_map.hpp
 template <class... Flags> struct flag_map;
 
 /// Type info builder interface
@@ -68,7 +96,7 @@ public:
     /// \param members - information about members
     template <class... Members>
     constexpr TMDESC_DOXYGEN_AUTO(/* unspecified */)
-    operator()(const member_info_wrapper<Members>&... members) const noexcept {
+    operator()(const member_info_pack<Members>&... members) const noexcept {
         return impl_(members...);
     }
 
@@ -77,7 +105,7 @@ public:
     /// \param type_flags - optional set of specific flags
     template <class... Members, class... Flags>
     constexpr TMDESC_DOXYGEN_AUTO(/* unspecified */)
-    operator()(const member_info_wrapper<Members>&... members,
+    operator()(const member_info_pack<Members>&... members,
                const flag_map<Flags...>& type_flags = {}) const noexcept {
         return impl_(members..., type_flags);
     }

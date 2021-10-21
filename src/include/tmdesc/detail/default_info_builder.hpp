@@ -5,8 +5,8 @@
 #pragma once
 
 #include "../tuple/tuple.hpp"
-#include "flag_map.hpp"
-#include "member_info_wrapper.hpp"
+#include "../flag_map.hpp"
+#include "member_info_pack.hpp"
 namespace tmdesc {
 
 namespace detail {
@@ -49,14 +49,14 @@ template <class T> struct default_info_builder {
     }
 
     template <class M, class U, class... Flags>
-    constexpr member_info_wrapper_t<M, T> member(zstring_view name, M U::*member) const noexcept {
+    constexpr simple_member_info_pack_for_memptr_t<M, T> member(zstring_view name, M U::*member) const noexcept {
         static_assert(std::is_base_of<U, T>{}, "the member must be a pointer to member of T or its base class");
         M T::*real_memptr = member;
         return {name, real_memptr};
     }
 
     template <class M, class U, class... Flags>
-    constexpr full_member_info_wrapper_t<M, T, Flags...> member(zstring_view name, M U::*member,
+    constexpr full_member_info_pack_for_memptr_t<M, T, Flags...> member(zstring_view name, M U::*member,
                                                                 const flag_map<Flags...>& member_flags) const noexcept {
         static_assert(std::is_base_of<U, T>{}, "the member must be a pointer to member of T or its base class");
         M T::*real_memptr = member;
@@ -70,7 +70,7 @@ template <class T> struct default_info_builder {
 
     template <class... Members, class... Flags>
     constexpr type_info_pack_with_flags<tuple<Members...>, flag_map<Flags...>>
-    operator()(const member_info_wrapper<Members>&... members, const flag_map<Flags...>& type_flags) const noexcept {
+    operator()(const member_info_pack<Members>&... members, const flag_map<Flags...>& type_flags) const noexcept {
         return {tuple<Members...>{members...}, type_flags};
     }
 };

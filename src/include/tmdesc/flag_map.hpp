@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "../meta/helpers.hpp"
-#include "../type_description.hpp"
+#include "meta/helpers.hpp"
+#include "type_description.hpp"
 namespace tmdesc {
 /// stored flag set with tags for access
 template <class... Flags> struct flag_map;

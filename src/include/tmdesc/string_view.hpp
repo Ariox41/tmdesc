@@ -15,7 +15,7 @@ constexpr bool operator==(string_view lha, string_view rha) noexcept;
 constexpr bool operator!=(string_view lha, string_view rha) noexcept;
 
 /// constexpr string_view for c++ 14.
-/// The interface is based on c++17 std::string_view
+/// The interface is based on c++17 std::string_view and boost::string_view
 /// \see class zstring_view
 class string_view {
     const char* m_str;

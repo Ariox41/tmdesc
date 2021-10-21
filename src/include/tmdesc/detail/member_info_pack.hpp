@@ -6,16 +6,13 @@
 
 #include "../meta/helpers.hpp"
 #include "../type_description.hpp"
-#include "flag_map.hpp"
+#include "../flag_map.hpp"
 namespace tmdesc {
-template <class Impl> struct member_info_wrapper : public Impl {
-    using Impl::Impl;
-    using Impl::operator=;
-};
+
 
 namespace detail {
 
-template <class MemberType, class OwnerType> struct member_info_pack {
+template <class MemberType, class OwnerType> struct simple_memptr_info {
 private:
     using owner_type      = OwnerType;
     using member_ptr_type = MemberType OwnerType::*;
@@ -26,14 +23,14 @@ private:
 public:
     using member_type = MemberType;
 
-    constexpr member_info_pack(zstring_view name, MemberType OwnerType::* memptr)
+    constexpr simple_memptr_info(zstring_view name, MemberType OwnerType::* memptr)
       : member_name(name)
       , member_ptr(memptr) {}
 
     constexpr zstring_view name() const noexcept { return member_name; }
     constexpr const member_type& get_ref(const owner_type& owner) const noexcept { return owner.*member_ptr; }
     constexpr member_type& get_ref(owner_type& owner) const noexcept { return owner.*member_ptr; }
-    constexpr member_type&& get_ref(owner_type&& owner) const noexcept { return owner.*member_ptr; }
+    constexpr member_type&& get(owner_type&& owner) const noexcept { return owner.*member_ptr; }
 
     constexpr flag_map<> flags() const noexcept { return {}; }
 
@@ -41,13 +38,13 @@ public:
     template <class Rha> constexpr bool operator!=(const Rha& rha) const noexcept { return !eqImpl(&rha); }
 
 private:
-    constexpr bool eqImpl(const member_info_pack* rha) const noexcept { return member_ptr == rha->member_ptr; }
+    constexpr bool eqImpl(const simple_memptr_info* rha) const noexcept { return member_ptr == rha->member_ptr; }
     constexpr bool eqImpl(const void*) const noexcept { return false; }
 };
 
 template <class MemberType, class OwnerType, class... Flags>
-struct full_member_info_pack : public member_info_pack<MemberType, OwnerType> {
-    using super_t         = member_info_pack<MemberType, OwnerType>;
+struct full_member_info_pack : public simple_memptr_info<MemberType, OwnerType> {
+    using super_t         = simple_memptr_info<MemberType, OwnerType>;
 
     const flag_map<Flags...> flags_;
 
@@ -60,10 +57,10 @@ public:
 };
 
 template <class MemberType, class OwnerType>
-using member_info_wrapper_t = member_info_wrapper<member_info_pack<MemberType, OwnerType>>;
+using simple_member_info_pack_for_memptr_t = ::tmdesc::member_info_pack<simple_memptr_info<MemberType, OwnerType>>;
 
 template <class MemberType, class OwnerType, class... Flags>
-using full_member_info_wrapper_t = member_info_wrapper<full_member_info_pack<MemberType, OwnerType, Flags...>>;
+using full_member_info_pack_for_memptr_t = ::tmdesc::member_info_pack<full_member_info_pack<MemberType, OwnerType, Flags...>>;
 } // namespace detail
 
 } // namespace tmdesc
