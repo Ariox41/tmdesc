@@ -1,6 +1,13 @@
-find_package(Ruby 2.4)
+# Copyright Victor Smirnov 2021
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+#
+# This file is part of the simple compile-time benchmark tools for the tmdesc library. 
+# The original idea is taken from https://github.com/ldionne/metabench
+
+find_package(Ruby 2.4 QUIET)
 if(NOT RUBY_EXECUTABLE)
-    message(WARNING "Ruby >= 2.4 was not found; the _metabench_.cmake module can't be used.")
+    message(WARNING "Ruby >= 2.4 was not found; the metabench.cmake module can't be used.")
     return()
 endif()
 
@@ -97,8 +104,9 @@ function (tmdesc_metabench_add_dataset target erb_template_src dataset_generator
         VERBATIM USES_TERMINAL)
 
     # alias for time measure target, and target for IDE prject tree view
-    add_custom_target("_metabench_.${target}" DEPENDS "${measure_result_path}")
-    target_sources("_metabench_.${target}" PRIVATE ${erb_template_full_path} )
+    add_custom_target("_metabench_.${target}"
+        DEPENDS "${measure_result_path}"
+        SOURCES ${erb_template_full_path})
     set_target_properties("_metabench_.${target}" PROPERTIES TMDESC_METABENCH_RESULT "${measure_result_path}")
 endfunction()
 
