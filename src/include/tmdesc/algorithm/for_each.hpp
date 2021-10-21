@@ -5,6 +5,7 @@
 #pragma once
 #include "../functional/invoke.hpp"
 #include "get_fwd.hpp"
+#include "../meta/logical_operations.hpp"
 
 namespace tmdesc {
 struct tuple_foreach_t {

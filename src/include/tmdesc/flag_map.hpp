@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "meta/helpers.hpp"
+#include "meta/optional_type.hpp"
 #include "type_description.hpp"
+#include <type_traits>
 namespace tmdesc {
 /// stored flag set with tags for access
 template <class... Flags> struct flag_map;
@@ -15,8 +16,8 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
     constexpr flag_map(::tmdesc::flag<Tags, Flags>... flags) noexcept
       : ::tmdesc::flag<Tags, Flags>{flags}... {
         static_assert(
-            meta::fast_and(
-                {meta::remove_cvref_t<decltype(std::declval<flag_map<::tmdesc::flag<Tags, Flags>...>>().find_flag(
+            meta::fast_and({meta::remove_cvref_t<
+                decltype(std::declval<flag_map<::tmdesc::flag<Tags, Flags>...>>().find_flag(
                     type_t<Tags>{}))>::is_some()...}),
             "tag duplication");
     }
@@ -27,10 +28,14 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
 
 private:
     template <class Tag, class Flag>
-    static constexpr meta::some<Flag> find_flag_impl(type_t<Tag>, const ::tmdesc::flag<Tag, Flag>* f) noexcept {
+    static constexpr meta::some<Flag> find_flag_impl(type_t<Tag>,
+                                                     const ::tmdesc::flag<Tag, Flag>* f) noexcept {
         return {f->flag};
     }
-    template <class Tag> static constexpr meta::none find_flag_impl(type_t<Tag>, const void*) noexcept { return {}; }
+    template <class Tag>
+    static constexpr meta::none find_flag_impl(type_t<Tag>, const void*) noexcept {
+        return {};
+    }
 };
 
 } // namespace tmdesc

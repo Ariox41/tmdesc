@@ -3,7 +3,8 @@
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#include "../../meta/helpers.hpp"
+#include <type_traits>
+#include "../../meta/logical_operations.hpp"
 namespace tmdesc {
 
 namespace detail {

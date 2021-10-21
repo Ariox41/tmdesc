@@ -34,5 +34,8 @@
 # QtCreator config file
 *.user
 
+# vs code local configuration
+/.vscode/*
+
 # default build dirrectory
 /build/*

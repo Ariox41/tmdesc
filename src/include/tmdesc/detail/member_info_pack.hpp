@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "../meta/helpers.hpp"
 #include "../type_description.hpp"
 #include "../flag_map.hpp"
 namespace tmdesc {

@@ -3,7 +3,8 @@
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#include "../meta/helpers.hpp"
+#include "../meta/void_t.hpp"
+#include "../meta/type_traits.hpp"
 #include <utility>
 namespace tmdesc {
 /// Tuple size customisation point
