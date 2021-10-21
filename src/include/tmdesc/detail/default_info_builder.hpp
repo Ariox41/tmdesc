@@ -75,23 +75,7 @@ template <class T> struct default_info_builder {
     }
 };
 
-template <class T> constexpr auto type_info_v = tmdesc_info(type_t<T>{}, info_builder<default_info_builder<T>>{});
-
 } // namespace detail
 
-template <class T> constexpr auto type_members_info_v = detail::type_info_v<T>.members();
-template <class T> using type_members_info_t = meta::remove_cvref_t<decltype (type_members_info_v<T>)>;
-
-template <class T> constexpr auto type_flags_v        = detail::type_info_v<T>.flags();
-
-template <class T, class = void> struct has_type_info : std::false_type {};
-template <class T>
-struct has_type_info<T, meta::void_t<decltype(tmdesc_info(type_t<T>{}, info_builder<detail::default_info_builder<T>>{}))>>
-  : std::true_type {};
-
-template <class T> constexpr bool has_type_info_v = has_type_info<T>::value;
-
-template <class T> struct type_members_count : public tuple_size<decltype(type_members_info_v<T>)> {};
-template <class T> constexpr std::size_t type_members_count_v = type_members_count<T>::value;
 
 } // namespace tmdesc

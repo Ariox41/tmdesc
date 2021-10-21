@@ -4,13 +4,13 @@
 
 #pragma once
 #include "algorithm/for_each.hpp"
-#include "detail/default_info_builder.hpp"
+#include "static_type_info.hpp"
 
 namespace tmdesc {
 template <class Owner, std::size_t I> struct member_reference {
     using owner_type     = meta::remove_cvref_t<Owner>;
-    using reference_type = decltype(get<I>(type_members_info_v<owner_type>).get_ref(std::declval<Owner>()));
-    using value_type     = typename tuple_element_t<I, type_members_info_t<owner_type>>::member_type;
+    using reference_type = decltype(get<I>(static_members_info_v<owner_type>).get_ref(std::declval<Owner>()));
+    using value_type     = member_type_at_t<I, owner_type>;
 
 private:
     Owner owner_;
@@ -22,12 +22,12 @@ public:
     constexpr member_reference& operator=(const member_reference&) = delete;
 
     constexpr reference_type get() const noexcept {
-        return ::tmdesc::get<I>(type_members_info_v<owner_type>).get_ref(static_cast<Owner&&>(owner_));
+        return ::tmdesc::get<I>(static_members_info_v<owner_type>).get_ref(static_cast<Owner&&>(owner_));
     }
-    static constexpr string_view name() noexcept { return ::tmdesc::get<I>(type_members_info_v<owner_type>).name(); }
+    static constexpr string_view name() noexcept { return ::tmdesc::get<I>(static_members_info_v<owner_type>).name(); }
     static constexpr std::size_t index() noexcept { return I; }
     static constexpr decltype(auto) flags() noexcept {
-        return ::tmdesc::get<I>(type_members_info_v<owner_type>).flags();
+        return ::tmdesc::get<I>(static_members_info_v<owner_type>).flags();
     }
 };
 

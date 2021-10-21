@@ -45,20 +45,7 @@ template <class... Flags> struct flag_map;
 
 /// Type info builder interface
 /// \details usage:
-/// \code
-/// namespace foo{
-///    struct bar{ int id; std::vector<std::string> groups; };
-///
-///    template<class Impl>
-///    constexpr auto tmdesc_info(tmdesc::type_t<bar>, tmdesc::info_builder<Impl> builder){
-///        return builder(builder.member("id", &bar::id),                          //
-///                       builder.member("groups", &bar::groups,                   //
-///                                      serialization::xml::array_item("group"))  //< custom flag of member
-///                       serialization::type_name("bar") //< custom flag of type
-///        )
-///    }
-/// }
-/// \endcode
+/// \todo example
 /// \note The type description does not affect compile time as long as it is not used \todo bench
 template <class Impl> class info_builder {
     Impl impl_;
