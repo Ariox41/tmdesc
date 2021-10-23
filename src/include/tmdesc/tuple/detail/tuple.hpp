@@ -1,10 +1,14 @@
 // Copyright Victor Smirnov 2021
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+//
+// The documentation can be found at the library's page:
+// https://github.com/Ariox41/tmdesc
 
 #pragma once
 #include <type_traits>
 #include "../../meta/logical_operations.hpp"
+#include <utility>
 namespace tmdesc {
 
 namespace detail {
@@ -31,7 +35,7 @@ protected:
 
 public:
     template <class... Args, std::enable_if_t<meta::conjunction_v<std::is_constructible<Ts, Args>...>, bool> = true>
-    constexpr tuple_impl(Args&&... args) noexcept(meta::fast_and({std::is_nothrow_constructible<Ts, Args&&>::value...}))
+    constexpr tuple_impl(Args&&... args) noexcept(meta::conjunction_v<std::is_nothrow_constructible<Ts, Args&&>...>)
       : tuple_item<Is, Ts>{std::forward<Args>(args)}... {}
 };
 

@@ -1,10 +1,13 @@
 // Copyright Victor Smirnov 2021
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+//
+// The documentation can be found at the library's page:
+// https://github.com/Ariox41/tmdesc
 
 #pragma once
 
-#include "../algorithm/get_fwd.hpp"
+#include "../get.hpp"
 #include "../functional/reference_wrapper_helpers.hpp"
 #include "detail/tuple.hpp"
 #include <utility>
@@ -25,7 +28,7 @@ template <class T> struct is_tuple : std::false_type {};
 template <class... Ts> struct is_tuple<tuple<Ts...>> : std::true_type {};
 template <class T> constexpr bool is_tuple_v = is_tuple<T>::value;
 
-template <class... Ts> struct tuple_size<tuple<Ts...>, void> : public std::integral_constant<std::size_t, sizeof...(Ts)> {};
+template <class... Ts> struct tuple_size<tuple<Ts...>, std::enable_if_t<true>> : public std::integral_constant<std::size_t, sizeof...(Ts)> {};
 
 template <class... Ts>
 constexpr tuple<unwrap_ref_decay_t<Ts>...>

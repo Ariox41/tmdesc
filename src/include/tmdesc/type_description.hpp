@@ -2,6 +2,9 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 //
+// The documentation can be found at the library's page:
+// https://github.com/Ariox41/tmdesc
+//
 // This file is intended to describe the members of a type 
 // without significantly increasing compilation time.
 // Such a description can be considered a forward declaration.

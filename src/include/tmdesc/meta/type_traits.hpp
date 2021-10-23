@@ -1,25 +1,25 @@
 // Copyright Victor Smirnov 2021
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+//
+// The documentation can be found at the library's page:
+// https://github.com/Ariox41/tmdesc
 
 #pragma once
 #include <type_traits>
 namespace tmdesc {
 namespace meta {
 
-template <class T> struct remove_cvref {
-    using type = std::remove_cv_t<std::remove_reference_t<T>>;
-};
+template <class T> struct remove_cvref : public std::remove_cv<std::remove_reference_t<T>> {};
 template <class T> using remove_cvref_t = typename remove_cvref<T>::type;
 
-template <template <class...> class Target, class T> struct apply_from;
-template <template <class...> class Target, template <class...> class Tuple, class... Args>
-struct apply_from<Target, Tuple<Args...>> {
-    using type = Target<Args...>;
-};
+using std::is_constructible;
+template <class T, class... Args>
+constexpr bool is_constructible_v = is_constructible<T, Args...>::value;
 
-template <template <class...> class Target, class T>
-using apply_from_t = typename apply_from<Target, T>::type;
+using std::is_nothrow_constructible;
+template <class T, class... Args>
+constexpr bool is_nothrow_constructible_v = is_nothrow_constructible<T, Args...>::value;
 
 } // namespace meta
 } // namespace tmdesc
