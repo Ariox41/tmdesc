@@ -23,9 +23,10 @@ public:
     using flags_type   = flag_map<>;
 
     constexpr type_info_pack()                      = default;
+    constexpr type_info_pack(type_info_pack&&)      = default;
     constexpr type_info_pack(const type_info_pack&) = default;
 
-    constexpr type_info_pack(Members&& m) noexcept
+    constexpr type_info_pack(Members m) noexcept
       : members_(std::move(m)) {}
     constexpr const members_type& members() const noexcept { return members_; }
     constexpr flags_type flags() const noexcept { return {}; }
@@ -67,13 +68,18 @@ template <class T> struct default_info_builder {
         static_assert(std::is_base_of<U, T>{},
                       "the member must be a pointer to member of T or its base class");
         M T::*real_memptr = member;
-        return {name, real_memptr, member_flags};
+        return {name, real_memptr, std::move(member_flags)};
     }
 
     template <class... Members>
     constexpr type_info_pack<tuple<Members...>>
     operator()(const Members&... members) const noexcept {
         return {tuple<Members...>{members...}};
+    }
+    template <class... Members>
+    constexpr auto operator()(const member_info_pack<Members>&... members,
+                              const flag_map<>&) const noexcept {
+        return (*this)(members...);
     }
 
     template <class... Members, class... Flags>

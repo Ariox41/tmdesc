@@ -7,7 +7,7 @@
 
 #pragma once
 
-#ifdef DOXYGEN
+#ifdef TMDESC_DOXYGEN
 #define TMDESC_DOXYGEN_AUTO(...) __VA_ARGS__
 #else
 #define TMDESC_DOXYGEN_AUTO(...) auto

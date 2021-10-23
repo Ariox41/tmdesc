@@ -28,7 +28,12 @@ template <class Tag, class Flag> struct flag { Flag value; };
 /// In the future, proxy object support may be added instead.
 template <class Impl> struct member_info_pack : public Impl {
     using Impl::Impl;
-    using Impl::operator=;
+
+    member_info_pack()                        = default;
+    member_info_pack(member_info_pack&&)      = default;
+    member_info_pack(const member_info_pack&) = default;
+    member_info_pack& operator=(member_info_pack&&) = delete;
+    member_info_pack& operator=(const member_info_pack&) = delete;
 
     /// \return reference to member of object, or proxy-object
     /// \note not a static function

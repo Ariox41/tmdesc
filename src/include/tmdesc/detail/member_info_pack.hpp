@@ -25,6 +25,10 @@ private:
 public:
     using member_type = MemberType;
 
+    constexpr simple_memptr_info()                          = default;
+    constexpr simple_memptr_info(simple_memptr_info&&)      = default;
+    constexpr simple_memptr_info(const simple_memptr_info&) = default;
+
     constexpr simple_memptr_info(zstring_view name, MemberType OwnerType::*memptr)
       : member_name(name)
       , member_ptr(memptr) {}
@@ -54,16 +58,20 @@ private:
 
 // Contains pointer to mamber, member name and member flags
 template <class MemberType, class OwnerType, class... Flags>
-struct full_member_info_pack : public simple_memptr_info<MemberType, OwnerType> {
+struct full_member_info : public simple_memptr_info<MemberType, OwnerType> {
     using super_t = simple_memptr_info<MemberType, OwnerType>;
 
     const flag_map<Flags...> flags_;
 
 public:
-    constexpr full_member_info_pack(zstring_view name, MemberType OwnerType::*memptr,
-                                    flag_map<Flags...> flags)
+    constexpr full_member_info()                        = default;
+    constexpr full_member_info(full_member_info&&)      = default;
+    constexpr full_member_info(const full_member_info&) = default;
+
+    constexpr full_member_info(zstring_view name, MemberType OwnerType::*memptr,
+                               flag_map<Flags...> flags)
       : super_t(name, memptr)
-      , flags_(flags) {}
+      , flags_(std::move(flags)) {}
 
     constexpr const flag_map<Flags...>& flags() const noexcept { return flags_; }
 };
@@ -74,7 +82,7 @@ using simple_member_info_pack_for_memptr_t =
 
 template <class MemberType, class OwnerType, class... Flags>
 using full_member_info_pack_for_memptr_t =
-    ::tmdesc::member_info_pack<full_member_info_pack<MemberType, OwnerType, Flags...>>;
+    ::tmdesc::member_info_pack<full_member_info<MemberType, OwnerType, Flags...>>;
 } // namespace detail
 
 } // namespace tmdesc

@@ -80,7 +80,9 @@ public:
       : string_view(str.data(), str.size()) {}
 
     constexpr string_view(const string_view&) noexcept = default;
+    constexpr string_view(string_view&&) noexcept = default;
     constexpr string_view& operator=(const string_view&) noexcept = default;
+    constexpr string_view& operator=(string_view&&) noexcept = default;
 
     constexpr const char* data() const noexcept { return m_str; }
     constexpr std::size_t size() const noexcept { return m_size; }

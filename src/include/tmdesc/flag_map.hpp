@@ -20,6 +20,13 @@ template <class... Flags> struct flag_map;
 
 template <class... Tags, class... Flags>
 struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Flags>... {
+    constexpr flag_map() = default;
+    constexpr flag_map(flag_map&&) = default;
+    constexpr flag_map(const flag_map&) = default;
+
+    constexpr flag_map& operator=(flag_map&&) = delete;
+    constexpr flag_map& operator=(const flag_map&) = delete;
+
     constexpr flag_map(::tmdesc::flag<Tags, Flags>... flags) noexcept
       : ::tmdesc::flag<Tags, Flags>{flags}... {
         static_assert(
@@ -31,7 +38,10 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
 
     /** find flag value for flag tag
 
-        @tparam Tag - tag type used as a key to find the value
+        @tparam Tag
+        A tag type used as a key to find the value.
+        The `Tag` can be passed as a template argument or as a value argumnet of type_t<Tag>
+
         @return @ref meta::some with flag value if the flag is found,
         or @ref meta::none if not found
      */
@@ -40,13 +50,20 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
     }
 
 private:
+    // return some<reference> because `flag_map` must have a static lifetime
     template <class Tag, class Flag>
-    static constexpr meta::some<Flag> find_flag_impl(type_t<Tag>,
-                                                     const ::tmdesc::flag<Tag, Flag>* f) noexcept {
+    static constexpr meta::some<const Flag&>
+    find_flag_impl(type_t<Tag>, const ::tmdesc::flag<Tag, Flag>* f) noexcept {
         return {f->value};
     }
     template <class Tag>
     static constexpr meta::none find_flag_impl(type_t<Tag>, const void*) noexcept {
+        return {};
+    }
+};
+
+template <> struct flag_map<> {
+    template <class Tag> constexpr meta::none find_flag(type_t<Tag> tag = {}) const noexcept {
         return {};
     }
 };
