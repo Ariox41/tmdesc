@@ -17,6 +17,7 @@ template <class T> struct unwrap_reference_wrapper { using type = T; };
 
 template <class T> struct unwrap_reference_wrapper<std::reference_wrapper<T>> { using type = T&; };
 
-template <class T> using unwrap_ref_decay_t = typename unwrap_reference_wrapper<std::decay_t<T>>::type;
+template <class T>
+using unwrap_ref_decay_t = typename unwrap_reference_wrapper<std::decay_t<T>>::type;
 
 } // namespace tmdesc

@@ -5,7 +5,7 @@
 // The documentation can be found at the library's page:
 // https://github.com/Ariox41/tmdesc
 //
-// This file is intended to describe the members of a type 
+// This file is intended to describe the members of a type
 // without significantly increasing compilation time.
 // Such a description can be considered a forward declaration.
 
@@ -24,9 +24,9 @@ template <class Tag, class Flag> struct flag { Flag flag; };
 /// T& get(S& object) const [noexcept];
 /// T&& get(S&& object) const [noexcept];
 ///
-/// The custom `set' method is not provided for performance reasons. 
+/// The custom `set' method is not provided for performance reasons.
 /// In the future, proxy object support may be added instead.
-template <class Impl> struct  member_info_pack: public Impl {
+template <class Impl> struct member_info_pack : public Impl {
     using Impl::Impl;
     using Impl::operator=;
 
@@ -78,7 +78,8 @@ public:
     /// \return an object of the member_info_wrapper<implementation_detail>
     template <class M, class T, class... Flags>
     constexpr TMDESC_DOXYGEN_AUTO(member_info_wrapper</* unspecified */>)
-        member(zstring_view name, M T::*member, const flag_map<Flags...>& member_flags) const noexcept {
+        member(zstring_view name, M T::*member,
+               const flag_map<Flags...>& member_flags) const noexcept {
         return impl_.member(name, member, member_flags);
     }
 

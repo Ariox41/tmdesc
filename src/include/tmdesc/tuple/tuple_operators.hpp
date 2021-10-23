@@ -17,8 +17,8 @@ namespace detail {
 struct eq_visitor {
     bool& ok;
     template <class T, class U>
-    constexpr void
-    operator()(const T& lha, const U& rha) noexcept(noexcept(!(std::declval<const T&>() == std::declval<const U&>()))) {
+    constexpr void operator()(const T& lha, const U& rha) noexcept(
+        noexcept(!(std::declval<const T&>() == std::declval<const U&>()))) {
         if (ok) {
             if (!(lha == rha)) {
                 ok = false;
@@ -31,8 +31,9 @@ struct less_visitor {
     bool& eq;
     template <class T, class U>
     constexpr void operator()(const T& lha, const U& rha) noexcept(
-        noexcept(std::declval<const T&>() < std::declval<const U&>()) && noexcept(std::declval<const U&>() <
-                                                                                  std::declval<const T&>())) {
+        noexcept(std::declval<const T&>() <
+                 std::declval<const U&>()) && noexcept(std::declval<const U&>() <
+                                                       std::declval<const T&>())) {
         if (eq) {
             if (lha < rha) {
                 eq   = false;
@@ -48,8 +49,8 @@ struct less_visitor {
 
 template <class... Ts, class... Us>
 constexpr std::enable_if_t<sizeof...(Ts) == sizeof...(Us), bool>
-operator==(const tuple<Ts...>& lha,
-           const tuple<Us...>& rha) noexcept(noexcept(tuple_foreach2(lha, rha, std::declval<detail::eq_visitor>()))) {
+operator==(const tuple<Ts...>& lha, const tuple<Us...>& rha) noexcept(
+    noexcept(tuple_foreach2(lha, rha, std::declval<detail::eq_visitor>()))) {
     bool eq = true;
     tuple_foreach2(lha, rha, detail::eq_visitor{eq});
     return eq;
@@ -62,8 +63,8 @@ operator!=(const tuple<Ts...>& lha, const tuple<Us...>& rha) noexcept(noexcept(!
 
 template <class... Ts, class... Us>
 constexpr std::enable_if_t<sizeof...(Ts) == sizeof...(Us), bool>
-operator<(const tuple<Ts...>& lha,
-          const tuple<Us...>& rha) noexcept(noexcept(tuple_foreach2(lha, rha, std::declval<detail::less_visitor>()))) {
+operator<(const tuple<Ts...>& lha, const tuple<Us...>& rha) noexcept(
+    noexcept(tuple_foreach2(lha, rha, std::declval<detail::less_visitor>()))) {
     bool less = false;
     bool eq   = true;
     tuple_foreach2(lha, rha, detail::less_visitor{less, eq});

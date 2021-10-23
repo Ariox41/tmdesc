@@ -44,22 +44,22 @@ public:
     /// data() == undefined
     /// \see zstring_view::zstring_view()
     constexpr string_view() noexcept
-        : string_view(nullptr, 0) {}
+      : string_view(nullptr, 0) {}
 
     /// Construct from pointer and size
     /// \post
     /// size() == size
     /// data() == str
     constexpr string_view(const char* str, const std::size_t size) noexcept
-        : m_str(str)
-        , m_size(size) {}
+      : m_str(str)
+      , m_size(size) {}
 
     /// Construct from null-terminated string.
     /// \post
     /// size() == (cstr == nullptr? std::strlen(cstr): 0)
     /// \note implicit constructor, like std::string_view
     constexpr string_view(const char* cstr) noexcept
-        : string_view(cstr, cstringsize(cstr)) {}
+      : string_view(cstr, cstringsize(cstr)) {}
 
     constexpr string_view(std::nullptr_t) = delete;
 
@@ -77,7 +77,7 @@ public:
     /// \see zstring_view::string_view(const std::basic_string<char, Ts...>&)
     template <class... Ts>
     string_view(const std::basic_string<char, Ts...>& str) noexcept
-        : string_view(str.data(), str.size()) {}
+      : string_view(str.data(), str.size()) {}
 
     constexpr string_view(const string_view&) noexcept = default;
     constexpr string_view& operator=(const string_view&) noexcept = default;
@@ -121,7 +121,9 @@ public:
     constexpr bool starts_with(char ch) const noexcept { return size() > 0 && front() == ch; }
     constexpr bool starts_with(string_view s) const noexcept { return substr(0, s.size()) == s; }
     constexpr bool ends_with(char ch) const noexcept { return size() > 0 && back() == ch; }
-    constexpr bool ends_with(string_view s) const noexcept { return substr(size() - s.size(), s.size()) == s; }
+    constexpr bool ends_with(string_view s) const noexcept {
+        return substr(size() - s.size(), s.size()) == s;
+    }
 
     constexpr std::size_t find_first_of(char ch) const noexcept {
         for (std::size_t i = 0; i < size(); ++i) {
@@ -157,7 +159,7 @@ public:
 private:
     static constexpr std::size_t cstringsize(const char* str) noexcept {
         std::size_t size = 0;
-        if(str){
+        if (str) {
             for (; str[size] != '\0'; ++size) {}
         }
         return size;
@@ -174,14 +176,15 @@ public:
     /// size() == 0
     /// *data() == '\0'
     /// *c_str() == '\0'
-    constexpr zstring_view()noexcept : zstring_view("")  {}
+    constexpr zstring_view() noexcept
+      : zstring_view("") {}
 
     /// Construct from null-terminated string.
     /// \post
     /// size() == (cstr == nullptr? std::strlen(cstr): 0)
     /// \note implicit constructor, like std::string_view
     constexpr zstring_view(const char* cstr) noexcept
-        : string_view(cstr) {}
+      : string_view(cstr) {}
 
     /// Construct from std::string
     /// \post
@@ -191,9 +194,9 @@ public:
     /// (*this)[size()] == '\0'
     template <class... Ts>
     zstring_view(const std::basic_string<char, Ts...>& src) noexcept
-        : string_view(src.c_str(), src.size()) {}
+      : string_view(src.c_str(), src.size()) {}
 
-    constexpr const char* c_str() const noexcept{ return data();}
+    constexpr const char* c_str() const noexcept { return data(); }
 };
 
 constexpr bool operator==(string_view lha, string_view rha) noexcept {
@@ -208,9 +211,17 @@ constexpr bool operator==(string_view lha, string_view rha) noexcept {
 }
 constexpr bool operator!=(string_view lha, string_view rha) noexcept { return !(lha == rha); }
 
-constexpr bool operator<(string_view lha, string_view rha) noexcept { return lha.compare(rha) == -1; }
-constexpr bool operator<=(string_view lha, string_view rha) noexcept { return lha.compare(rha) != 1; }
-constexpr bool operator>(string_view lha, string_view rha) noexcept { return lha.compare(rha) == 1; }
-constexpr bool operator>=(string_view lha, string_view rha) noexcept { return lha.compare(rha) != -1; }
+constexpr bool operator<(string_view lha, string_view rha) noexcept {
+    return lha.compare(rha) == -1;
+}
+constexpr bool operator<=(string_view lha, string_view rha) noexcept {
+    return lha.compare(rha) != 1;
+}
+constexpr bool operator>(string_view lha, string_view rha) noexcept {
+    return lha.compare(rha) == 1;
+}
+constexpr bool operator>=(string_view lha, string_view rha) noexcept {
+    return lha.compare(rha) != -1;
+}
 
 } // namespace tmdesc

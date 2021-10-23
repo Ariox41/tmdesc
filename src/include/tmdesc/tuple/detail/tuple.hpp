@@ -6,8 +6,8 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include <type_traits>
 #include "../../meta/logical_operations.hpp"
+#include <type_traits>
 #include <utility>
 namespace tmdesc {
 
@@ -34,31 +34,45 @@ protected:
     tuple_impl& operator=(const tuple_impl&) = default;
 
 public:
-    template <class... Args, std::enable_if_t<meta::conjunction_v<std::is_constructible<Ts, Args>...>, bool> = true>
-    constexpr tuple_impl(Args&&... args) noexcept(meta::conjunction_v<std::is_nothrow_constructible<Ts, Args&&>...>)
+    template <
+        class... Args,
+        std::enable_if_t<meta::conjunction_v<std::is_constructible<Ts, Args>...>, bool> = true>
+    constexpr tuple_impl(Args&&... args) noexcept(
+        meta::conjunction_v<std::is_nothrow_constructible<Ts, Args&&>...>)
       : tuple_item<Is, Ts>{std::forward<Args>(args)}... {}
 };
 
 struct getter_for_tuple_t {
-    template <std::size_t I, class T> static constexpr const T& get_by_id(const tuple_item<I, T>& e) noexcept {
+    template <std::size_t I, class T>
+    static constexpr const T& get_by_id(const tuple_item<I, T>& e) noexcept {
         return e.value;
     }
-    template <std::size_t I, class T> static constexpr T& get_by_id(tuple_item<I, T>& e) noexcept { return e.value; }
-    template <std::size_t I, class T> static constexpr T&& get_by_id(tuple_item<I, T>&& e) noexcept {
+    template <std::size_t I, class T> static constexpr T& get_by_id(tuple_item<I, T>& e) noexcept {
+        return e.value;
+    }
+    template <std::size_t I, class T>
+    static constexpr T&& get_by_id(tuple_item<I, T>&& e) noexcept {
         return std::move(e).value;
     }
-    template <std::size_t I, class T> static constexpr T&& get_by_id(const tuple_item<I, T>&& e) noexcept {
+    template <std::size_t I, class T>
+    static constexpr T&& get_by_id(const tuple_item<I, T>&& e) noexcept {
         return std::move(e).value;
     }
 
-    template <class T, std::size_t I> static constexpr const T& get_by_type(const tuple_item<I, T>& e) noexcept {
+    template <class T, std::size_t I>
+    static constexpr const T& get_by_type(const tuple_item<I, T>& e) noexcept {
         return e.value;
     }
-    template <class T, std::size_t I> static constexpr T& get_by_type(tuple_item<I, T>& e) noexcept { return e.value; }
-    template <class T, std::size_t I> static constexpr T&& get_by_type(tuple_item<I, T>&& e) noexcept {
+    template <class T, std::size_t I>
+    static constexpr T& get_by_type(tuple_item<I, T>& e) noexcept {
+        return e.value;
+    }
+    template <class T, std::size_t I>
+    static constexpr T&& get_by_type(tuple_item<I, T>&& e) noexcept {
         return std::move(e).value;
     }
-    template <class T, std::size_t I> static constexpr T&& get_by_type(const tuple_item<I, T>&& e) noexcept {
+    template <class T, std::size_t I>
+    static constexpr T&& get_by_type(const tuple_item<I, T>&& e) noexcept {
         return std::move(e).value;
     }
 
