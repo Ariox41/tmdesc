@@ -1,24 +1,31 @@
 #include <tmdesc/functional/invoke.hpp>
-#include <tmdesc/meta/helpers.hpp>
+#include <tmdesc/meta/logical_operations.hpp>
 #include <tmdesc/tuple/tuple.hpp>
 #include <utility>
 
 namespace bench {
+template <std::size_t I, class T> constexpr const T& get_impl(const ::tmdesc::detail::tuple_item<I, T>& e) noexcept {
+    return e.value;
+}
+template <std::size_t I, class T> constexpr T& get_impl(::tmdesc::detail::tuple_item<I, T>& e) noexcept {
+    return e.value;
+}
+template <std::size_t I, class T> constexpr T&& get_impl(::tmdesc::detail::tuple_item<I, T>&& e) noexcept {
+    return e.value;
+}
 
-template <std::size_t I, class T> constexpr const T& get(const ::tmdesc::detail::tuple_item<I, T>& e) noexcept {
-    return e.value;
-}
-template <std::size_t I, class T> constexpr T& get(::tmdesc::detail::tuple_item<I, T>& e) noexcept {
-    return e.value;
-}
-template <std::size_t I, class T> constexpr T&& get(::tmdesc::detail::tuple_item<I, T>&& e) noexcept {
-    return e.value;
+// faster than overload
+template <std::size_t I, class Tuple,
+          std::enable_if_t<::tmdesc::is_tuple_v<::tmdesc::meta::remove_cvref_t<Tuple>>, bool> = true>
+constexpr decltype(auto) get(Tuple&& t) noexcept {
+    return ::bench::get_impl<I>(std::forward<Tuple>(t));
 }
 
 template <class Tuple, class Fn, std::size_t... I>
 constexpr void tuple_foreach_impl(Tuple&& t, Fn&& fn, std::index_sequence<I...>) noexcept(
-    ::tmdesc::meta::fast_and({noexcept(std::declval<Fn>()(get<I>(std::declval<Tuple>())))...})) {
-    (void)std::initializer_list<bool>{true, ((void)fn(get<I>(std::forward<Tuple>(t))), void(), true)...};
+    ::tmdesc::meta::fast_and({noexcept(::tmdesc::invoke(std::declval<Fn>(), ::bench::get<I>(std::declval<Tuple>())))...})) {
+    (void)std::initializer_list<bool>{
+        true, ((void)::tmdesc::invoke(std::forward<Fn>(fn), ::bench::get<I>(std::forward<Tuple>(t))), void(), true)...};
 }
 
 template <class Tuple, class Fn>
@@ -56,8 +63,8 @@ int main() {
     constexpr auto t =
         tmdesc::make_tuple(<%= (1.. @item).map{ | i | "Value<" + i.to_s + ">{" + (i * 7).to_s + "}"}.join(', ') %>);
 #ifdef METABENCH
-    static_assert (noexcept(bench::calc_sum(t)), "");
-    static_assert (noexcept(bench::calc_sub2(t)), "");
+    static_assert(noexcept(bench::calc_sum(t)), "");
+    static_assert(noexcept(bench::calc_sub2(t)), "");
     constexpr int sum = bench::calc_sum(t);
     constexpr int sub = bench::calc_sub2(t);
     static_assert(sum == <%= (1.. @item).inject(0){ | acc, i | acc + i * 8} %>, "bench impl error");

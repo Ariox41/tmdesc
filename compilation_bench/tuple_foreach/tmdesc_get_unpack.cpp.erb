@@ -1,27 +1,18 @@
 #include <tmdesc/functional/invoke.hpp>
-#include <tmdesc/meta/helpers.hpp>
+#include <tmdesc/meta/logical_operations.hpp>
 #include <tmdesc/tuple/tuple.hpp>
 #include <utility>
 
 namespace bench {
-
-//template <class Seq> struct unpack_impl_t;
-//template <std::size_t... I> struct unpack_impl_t<std::index_sequence<I...>> {
-//    template <class Tuple, class Fn>
-//    constexpr decltype(auto) operator()(Tuple&& tuple, Fn&& fn) const
-//        noexcept(noexcept(::tmdesc::invoke(std::declval<Fn>(), ::tmdesc::get<I>(std::declval<Tuple>())...))) {
-//        return ::tmdesc::invoke(std::forward<Fn>(fn), ::tmdesc::get<I>(std::forward<Tuple>(tuple))...);
-//    }
-//};
+using ::tmdesc::get;
 
 struct unpack_t {
 private:
-    //template <class Tuple> using impl_for_tuple = unpack_impl_t<::tmdesc::index_sequence_for_tuple<Tuple>>;
 
     template <class Tuple, class Fn, std::size_t... I>
     constexpr decltype(auto) impl(Tuple&& tuple, Fn&& fn, std::index_sequence<I...>) const
-        noexcept(noexcept(::tmdesc::invoke(std::declval<Fn>(), ::tmdesc::get<I>(std::declval<Tuple>())...))) {
-        return ::tmdesc::invoke(std::forward<Fn>(fn), ::tmdesc::get<I>(std::forward<Tuple>(tuple))...);
+        noexcept(noexcept(::tmdesc::invoke(std::declval<Fn>(), get<I>(std::declval<Tuple>())...))) {
+        return ::tmdesc::invoke(std::forward<Fn>(fn), get<I>(std::forward<Tuple>(tuple))...);
     }
 public:
     template <class Tuple, class Fn>

@@ -13,6 +13,7 @@ endif()
 
 set(TMDESC_METABENCH_SELF_FILE_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
+# Global target for bench all
 add_custom_target(TMDESC_MATABENCH_ALL)
 
 
