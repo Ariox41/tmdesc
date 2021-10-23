@@ -1,9 +1,21 @@
 # tmdesc
-Serialisation-oriented type members description library for c++ 14
+Serialisation-oriented type members description library for c++ 14.
 
-Work in progress
+**Work in progress**.
 
-# Usage:
+# Goals
+* iteration by structure data members
+* custom optional flags for the type or any data members of the type 
+* fast compilation
+* completely constexpr
+* с++ 14 support 
+
+# Supported Compilers
+Currently tested on gcc 10 and msvc 2017.
+
+Earlier versions were compiled using gcc 6.2 and clang 6.0, but incompatibility issues could appear at the moment. These issues will be fixed later.
+
+# Example(currently works):
 ``` c++
 #include <iostream>
 #include <tmdesc/algorithm/for_each.hpp>
