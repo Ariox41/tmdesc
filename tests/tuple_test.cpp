@@ -70,11 +70,11 @@ struct throw_visitor{
 
 //static_assert (!noexcept (tmdesc::repeat_n<4>(throw_visitor{})), "");
 
-static_assert (noexcept (tmdesc::tuple_foreach(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
+static_assert (noexcept (tmdesc::for_each(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
 //static_assert (!noexcept (tmdesc::tuple_foreach(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
 
-static_assert (noexcept (tmdesc::tuple_transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
-//static_assert (!noexcept (tmdesc::tuple_transform_to(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
+static_assert (noexcept (tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
+//static_assert (!noexcept (tmdesc::transform_t<tuple>_to(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
 
 // implementation test
 
@@ -192,9 +192,9 @@ struct accumulator {
 
 template <class T>
 constexpr int
-accumulate(const T& tuple) noexcept(noexcept(tmdesc::tuple_foreach(tuple, accumulator{std::declval<int&>()}))) {
+accumulate(const T& tuple) noexcept(noexcept(tmdesc::for_each(tuple, accumulator{std::declval<int&>()}))) {
     int res = 0;
-    tmdesc::tuple_foreach(tuple, accumulator{res});
+    tmdesc::for_each(tuple, accumulator{res});
     return res;
 }
 
@@ -207,9 +207,9 @@ struct increment_fn {
     template <class T> constexpr auto operator()(const T& v) const noexcept { return v + T(1); }
 };
 
-TEST_CASE("tuple_transform_to") {
+TEST_CASE("transform_t<tuple>_to") {
     constexpr auto tuple = tmdesc::make_tuple(1, '2', 42);
-    constexpr auto r     = tmdesc::tuple_transform(tuple, increment_fn{});
+    constexpr auto r     = tmdesc::transform_to<tmdesc::tuple>(tuple, increment_fn{});
     STATIC_NOTHROW_CHECK(tmdesc::get<0>(r) == 2);
     STATIC_NOTHROW_CHECK(tmdesc::get<1>(r) == '3');
     STATIC_NOTHROW_CHECK(tmdesc::get<2>(r) == 43);

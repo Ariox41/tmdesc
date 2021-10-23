@@ -50,9 +50,9 @@ struct less_visitor {
 template <class... Ts, class... Us>
 constexpr std::enable_if_t<sizeof...(Ts) == sizeof...(Us), bool>
 operator==(const tuple<Ts...>& lha, const tuple<Us...>& rha) noexcept(
-    noexcept(tuple_foreach2(lha, rha, std::declval<detail::eq_visitor>()))) {
+    noexcept(for_each2(lha, rha, std::declval<detail::eq_visitor>()))) {
     bool eq = true;
-    tuple_foreach2(lha, rha, detail::eq_visitor{eq});
+    for_each2(lha, rha, detail::eq_visitor{eq});
     return eq;
 }
 template <class... Ts, class... Us>
@@ -64,10 +64,10 @@ operator!=(const tuple<Ts...>& lha, const tuple<Us...>& rha) noexcept(noexcept(!
 template <class... Ts, class... Us>
 constexpr std::enable_if_t<sizeof...(Ts) == sizeof...(Us), bool>
 operator<(const tuple<Ts...>& lha, const tuple<Us...>& rha) noexcept(
-    noexcept(tuple_foreach2(lha, rha, std::declval<detail::less_visitor>()))) {
+    noexcept(for_each2(lha, rha, std::declval<detail::less_visitor>()))) {
     bool less = false;
     bool eq   = true;
-    tuple_foreach2(lha, rha, detail::less_visitor{less, eq});
+    for_each2(lha, rha, detail::less_visitor{less, eq});
     return less;
 }
 template <class... Ts, class... Us>

@@ -33,7 +33,7 @@ struct add {
 
 template <class T> constexpr int calc_member_sum(const T& t) noexcept {
     int acc = 0;
-    ::tmdesc::tuple_foreach(t, add{acc});
+    ::tmdesc::for_each(t, add{acc});
     return acc;
 }
 

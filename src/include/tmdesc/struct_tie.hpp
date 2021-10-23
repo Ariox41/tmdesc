@@ -23,8 +23,8 @@ private:
 public:
     template <class T, class Enable = std::enable_if_t<has_type_info_v<meta::remove_cvref_t<T>>>>
     constexpr auto operator()(T&& struct_) const noexcept {
-        return tuple_transform(static_members_info_v<meta::remove_cvref_t<T>>,
-                               get_ref_visitor<T&&>{struct_});
+        return transform_to<tuple>(static_members_info_v<meta::remove_cvref_t<T>>,
+                                   get_ref_visitor<T&&>{struct_});
     }
 };
 constexpr struct_tie_t struct_tie{};
