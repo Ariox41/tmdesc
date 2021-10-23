@@ -75,7 +75,7 @@ struct invoke_t {
 constexpr invoke_t invoke{};
 
 template <class Fn, class... Args> struct invoke_result {
-    using type = decltype(invoke(std::declval<Fn>(), std::declval<Args&&>()...));
+    using type = decltype(invoke(std::declval<Fn>(), std::declval<Args>()...));
 };
 template <class Fn, class... Args>
 using invoke_result_t = typename invoke_result<Fn, Args...>::type;
@@ -86,18 +86,19 @@ template <class AlwaysVoid, class Fn, class... Args> struct invokable : public s
 };
 
 template <class Fn, class... Args>
-struct invokable<meta::void_t<invoke_result_t<Fn, Args...>>, Fn, Args...> : public std::true_type {
-    static constexpr bool nothrow = noexcept(invoke(std::declval<Fn>(), std::declval<Args&&>()...));
+struct invokable<meta::void_t<decltype(invoke(std::declval<Fn>(), std::declval<Args>()...))>, //
+                 Fn, Args...>                                                                 //
+  : public std::true_type {
+    static constexpr bool nothrow = noexcept(invoke(std::declval<Fn>(), std::declval<Args>()...));
 };
 
 } // namespace detail
 template <class Fn, class... Args>
 using is_invokable = typename detail::invokable<void, Fn, Args...>::type;
-template <class Fn, class... Args>
-static constexpr bool is_invokable_v = is_invokable<Fn, Args...>::value;
+template <class Fn, class... Args> constexpr bool is_invokable_v = is_invokable<Fn, Args...>::value;
 
 template <class Fn, class... Args>
-static constexpr bool is_nothrow_invokable_v = detail::invokable<void, Fn, Args...>::nothrow;
+constexpr bool is_nothrow_invokable_v = detail::invokable<void, Fn, Args...>::nothrow;
 template <class Fn, class... Args>
 struct is_nothrow_invokable
   : public std::integral_constant<bool, is_nothrow_invokable_v<Fn, Args...>> {};
