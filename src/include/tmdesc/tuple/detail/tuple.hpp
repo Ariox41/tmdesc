@@ -59,6 +59,14 @@ struct getter_for_tuple_t {
         return std::move(e).value;
     }
 
+    template <std::size_t I, class T>
+    static detail::tuple_item<I, T> tuple_element_impl(const tuple_item<I, T>&) noexcept;
+
+    template <std::size_t I, class Tuple>
+    using tuple_element = decltype(tuple_element_impl<I>(std::declval<const Tuple&>()));
+};
+
+struct getter_by_type_for_tuple_t {
     template <class T, std::size_t I>
     static constexpr const T& get_by_type(const tuple_item<I, T>& e) noexcept {
         return e.value;
@@ -75,12 +83,6 @@ struct getter_for_tuple_t {
     static constexpr T&& get_by_type(const tuple_item<I, T>&& e) noexcept {
         return std::move(e).value;
     }
-
-    template <std::size_t I, class T>
-    static detail::tuple_item<I, T> tuple_element_impl(const tuple_item<I, T>&) noexcept;
-
-    template <std::size_t I, class Tuple>
-    using tuple_element = decltype(tuple_element_impl<I>(std::declval<const Tuple&>()));
 };
 
 } // namespace detail

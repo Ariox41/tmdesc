@@ -44,6 +44,9 @@ template <class... Ts> constexpr tuple<Ts&...> tie(Ts&... ts) noexcept { return 
 template <class... Ts> struct tuple_getter<tuple<Ts...>> {
     using type = detail::getter_for_tuple_t;
 };
+template <class... Ts> struct tuple_getter_by_type<tuple<Ts...>> {
+    using type = detail::getter_by_type_for_tuple_t;
+};
 
 // template <std::size_t I, class Tuple, std::enable_if_t<is_tuple_v<meta::remove_cvref_t<Tuple>>,
 // bool> = true> constexpr decltype(auto) get(Tuple&& t) noexcept {
