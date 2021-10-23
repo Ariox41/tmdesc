@@ -17,7 +17,7 @@
 
 namespace tmdesc {
 template <class T> struct type_t : public meta::type_t<T> {};
-template <class Tag, class Flag> struct flag { Flag flag; };
+template <class Tag, class Flag> struct flag { Flag value; };
 
 /// The member_info_pack implementation can provide one or more methods from:
 /// const T& get(const S& object) const [noexcept];

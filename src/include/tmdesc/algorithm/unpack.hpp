@@ -9,6 +9,24 @@
 #include "../functional/invoke.hpp"
 #include "../get.hpp"
 namespace tmdesc {
+/** Invoke `fn` with `t` elements as arguments
+
+    @param t
+    A tuple-like object with `get` and `tuple_size` operations
+
+    @param fn
+    A invocable object that accepts a set of tuple elements as a set of arguments
+
+    @return `fn` invoke result
+ */
+#ifdef TMDESC_DOXYGEN
+template <template <class...> class Consumer>
+constexpr auto unpack = [](auto&& t, auto&& fn) {
+    return invoke(fn, get<0>(t),
+                  /*...*/
+                  get<N - 1>(t));
+};
+#else
 struct unpack_t {
 private:
     template <class Tuple, class Fn, std::size_t... I>
@@ -23,11 +41,12 @@ public:
     template <class Tuple, class Fn>
     constexpr decltype(auto) operator()(Tuple&& tuple, Fn&& fn) const
         noexcept(noexcept(unpack_impl(std::declval<Tuple>(), std::declval<Fn>(),
-                               ::tmdesc::index_sequence_for_tuple<Tuple>{}))) {
+                                      ::tmdesc::index_sequence_for_tuple<Tuple>{}))) {
         return unpack_impl(std::forward<Tuple>(tuple), std::forward<Fn>(fn),
-                    ::tmdesc::index_sequence_for_tuple<Tuple>{});
+                           ::tmdesc::index_sequence_for_tuple<Tuple>{});
     }
 };
 
 constexpr unpack_t unpack{};
+#endif
 } // namespace tmdesc

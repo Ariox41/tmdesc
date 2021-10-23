@@ -13,6 +13,7 @@ namespace tmdesc {
 
 namespace detail {
 
+// Contains pointer to member and member flags, without flags
 template <class MemberType, class OwnerType> struct simple_memptr_info {
 private:
     using owner_type      = OwnerType;
@@ -29,10 +30,10 @@ public:
       , member_ptr(memptr) {}
 
     constexpr zstring_view name() const noexcept { return member_name; }
-    constexpr const member_type& get_ref(const owner_type& owner) const noexcept {
+    constexpr const member_type& get(const owner_type& owner) const noexcept {
         return owner.*member_ptr;
     }
-    constexpr member_type& get_ref(owner_type& owner) const noexcept { return owner.*member_ptr; }
+    constexpr member_type& get(owner_type& owner) const noexcept { return owner.*member_ptr; }
     constexpr member_type&& get(owner_type&& owner) const noexcept { return owner.*member_ptr; }
 
     constexpr flag_map<> flags() const noexcept { return {}; }
@@ -51,6 +52,7 @@ private:
     constexpr bool eqImpl(const void*) const noexcept { return false; }
 };
 
+// Contains pointer to mamber, member name and member flags
 template <class MemberType, class OwnerType, class... Flags>
 struct full_member_info_pack : public simple_memptr_info<MemberType, OwnerType> {
     using super_t = simple_memptr_info<MemberType, OwnerType>;

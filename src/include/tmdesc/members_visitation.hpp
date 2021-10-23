@@ -13,7 +13,7 @@ namespace tmdesc {
 template <class Owner, std::size_t I> struct member_reference {
     using owner_type = meta::remove_cvref_t<Owner>;
     using reference_type =
-        decltype(get<I>(static_members_info_v<owner_type>).get_ref(std::declval<Owner>()));
+        decltype(get<I>(static_members_info_v<owner_type>).get(std::declval<Owner>()));
     using value_type = member_type_at_t<I, owner_type>;
 
 private:
@@ -27,7 +27,7 @@ public:
 
     constexpr reference_type get() const noexcept {
         return ::tmdesc::get<I>(static_members_info_v<owner_type>)
-            .get_ref(static_cast<Owner&&>(owner_));
+            .get(static_cast<Owner&&>(owner_));
     }
     static constexpr string_view name() noexcept {
         return ::tmdesc::get<I>(static_members_info_v<owner_type>).name();

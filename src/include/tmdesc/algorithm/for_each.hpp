@@ -11,6 +11,22 @@
 #include "../meta/logical_operations.hpp"
 
 namespace tmdesc {
+
+/** Call `fn` on each element of `t` and ignore the result
+
+    @param t
+    A tuple-like object with `get` and `tuple_size` operations
+
+    @param fn
+    A unary invokable object overloaded for each element of the `t`
+ */
+#ifdef TMDESC_DOXYGEN
+constexpr auto for_each = [](auto&& t, auto&& fn) -> void {
+    invoke(fn, get<0>(t));
+    /*...*/
+    invoke(fn, get<N - 1>(t));
+};
+#else
 struct for_each_t {
 private:
     template <class Tuple, class Fn, std::size_t... I>
@@ -33,7 +49,27 @@ public:
     }
 };
 constexpr for_each_t for_each{};
+#endif
 
+/** Call `fn` on each pair of elements of `t1` and `t2` with the same index and ignore the result
+
+    @param t1
+    A tuple-like object with `get` and `tuple_size` operations
+
+    @param t2
+    A tuple-like object with `get` and `tuple_size` operations
+    @note the tuple_size of `t2` must be equal to the tuple_size of `t1`
+
+    @param fn
+    Binary callable object overloaded for each pair of elements of 't1' and `t2' with the same index
+ */
+#ifdef TMDESC_DOXYGEN
+constexpr auto for_each2 = [](auto&& t1, auto&& t2, auto&& fn) -> void {
+    invoke(fn, get<0>(t1), get<0>(t2));
+    /*...*/
+    invoke(fn, get<N - 1>(t1), get<N - 1>(t2));
+};
+#else
 struct for_each2_t {
 private:
     template <class Tuple1, class Tuple2, class Fn, std::size_t... I>
@@ -61,4 +97,5 @@ public:
     }
 };
 constexpr for_each2_t for_each2{};
+#endif
 } // namespace tmdesc

@@ -9,7 +9,7 @@ namespace detail {
 struct getter_for_struct_t {
     template <std::size_t I, class T> static constexpr decltype(auto) get_by_id(T&& s) noexcept {
         constexpr auto member_getter = get<I>(static_members_info_v<meta::remove_cvref_t<T>>);
-        return member_getter.get_ref(std::forward<T>(s));
+        return member_getter.get(std::forward<T>(s));
     }
 
     /// \todo not implemented

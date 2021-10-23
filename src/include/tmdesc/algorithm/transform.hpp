@@ -9,6 +9,32 @@
 #include "../functional/invoke.hpp"
 #include "../get.hpp"
 namespace tmdesc {
+/** Call `fn` on each element of `t` and return `Consumer` with result
+    @tparam Consumer
+    A tuple-like container for result values.
+    `invoke_result` of `fn` will be set to the template parameters of the `Consumer`
+
+    @param t
+    A tuple-like object with `get` and `tuple_size` operations
+
+    @param fn
+    A unary invokable object overloaded for each element of the `t`
+
+    @return `Consumer` of `fn` invoke result
+ */
+#ifdef TMDESC_DOXYGEN
+template <template <class...> class Consumer>
+constexpr auto transform_to =
+    [](auto&& t, auto&& fn) -> Consumer<decltype(invoke(fn, get<0>(t))),
+                                        /*...*/
+                                        decltype(invoke(fn, get<N - 1>(t)))> {
+    return {
+        invoke(fn, get<0>(t));
+        /*...*/
+        invoke(fn, get<N - 1>(t))
+    };
+};
+#else
 template <template <class...> class Consumer> struct transform_t {
 private:
     template <class Tuple, class Fn, std::size_t... I>
@@ -32,7 +58,40 @@ public:
 
 /// Apply function to each element of tuple-like object and return Consumer<Result...>(results...)
 template <template <class...> class Consumer> constexpr transform_t<Consumer> transform_to{};
+#endif
 
+/** Call `fn` on each pair of elements of `t1` and `t2` with the same index and
+    return `Consumer` with result
+    @tparam Consumer
+    A tuple-like container for result values.
+    `invoke_result` of `fn` will be set to the template parameters of the `Consumer`
+
+    @param t1
+    A tuple-like object with `get` and `tuple_size` operations
+
+    @param t2
+    A tuple-like object with `get` and `tuple_size` operations
+    @note the tuple_size of `t2` must be equal to the tuple_size of `t1`
+
+    @param fn
+    Binary callable object overloaded for each pair of elements of 't1' and `t2' with the same index
+
+    @return `Consumer` of `fn` invoke result
+ */
+#ifdef TMDESC_DOXYGEN
+template <template <class...> class Consumer>
+constexpr auto transform2_to =
+    [](auto&& t1, auto&& t2,
+       auto&& fn) -> Consumer<decltype(invoke(fn, get<0>(t1), get<0>(t2))),
+                              /*...*/
+                              decltype(invoke(fn, get<N - 1>(t1), get<N - 1>(t2)))> {
+    return {
+        invoke(fn, get<0>(t1), get<0>(t2));
+        /*...*/
+        invoke(fn, get<N - 1>(t1), get<N - 1>(t2))
+    };
+};
+#else
 template <template <class...> class Consumer> struct transform2_t {
 private:
     template <class Tuple1, class Tuple2, class Fn, std::size_t... I>
@@ -64,18 +123,32 @@ public:
 /// Apply function to each pair of same index element of tuple-like object,
 /// and return Consumer<Result...>(results...)
 template <template <class...> class Consumer> constexpr transform2_t<Consumer> transform2_to{};
+#endif
 
 namespace detail {
-template <class T> struct to_struct_helper { template <class... Args> using apply = T; };
+template <class T> struct type_as_template { template <class... Args> using apply = T; };
 } // namespace detail
 
-/// Apply function to each element of tuple-like object and return T{results...}
+/// Similar to @ref transform_to, but a fully defined type `T` is used as `Consumer`
+#ifdef TMDESC_DOXYGEN
 template <class T>
-constexpr transform_t<detail::to_struct_helper<T>::template apply> transform_to_type;
+constexpr auto transform_to_type = [](auto&& t, auto&& fn) -> T {
+    return transform_to<detail::type_as_template<T>::template apply>(t, fn);
+};
+#else
+template <class T>
+constexpr transform_t<detail::type_as_template<T>::template apply> transform_to_type;
+#endif
 
-/// Apply function to each pair of same index element of tuple-like object,
-/// and return T{results...}
+/// Similar to @ref transform2_to, but a fully defined type `T` is used as `Consumer`
+#ifdef TMDESC_DOXYGEN
 template <class T>
-constexpr transform2_t<detail::to_struct_helper<T>::template apply> transform2_to_type;
+constexpr auto transform2_to_type = [](auto&& t, auto&& fn) -> T {
+    return transform2_to<detail::type_as_template<T>::template apply>(t, fn);
+};
+#else
+template <class T>
+constexpr transform2_t<detail::type_as_template<T>::template apply> transform2_to_type;
+#endif
 
 } // namespace tmdesc
