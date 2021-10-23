@@ -7,10 +7,10 @@
 #include <tmdesc/members_view.hpp>
 #include <tmdesc/type_description.hpp>
 
-// Custom flag tag
+// Custom member flag tag
 struct additional_description_tag;
 
-// Custom flag implementation
+// Custom member flag implementation
 constexpr tmdesc::flag<additional_description_tag, tmdesc::zstring_view>
 additional_description(tmdesc::zstring_view descr) {
     return {descr};
