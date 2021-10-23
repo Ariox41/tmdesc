@@ -17,7 +17,6 @@ additional_description(tmdesc::zstring_view descr) {
 }
 
 namespace custom_ns {
-
 struct Point {
     int x;
     int y;
@@ -39,6 +38,7 @@ struct Rect {
     friend constexpr auto tmdesc_info(::tmdesc::type_t<Rect>, ::tmdesc::info_builder<Impl> wrap) {
         return wrap(wrap.member("tl", &Rect::top_left),
                     wrap.member("br", &Rect::bottom_right,
+                                // custom flag for member
                                 wrap.flags(additional_description("br point description"))));
     }
 };
@@ -54,12 +54,13 @@ void print(const T& object_with_description) {
     ::tmdesc::for_each(tmdesc::members_view(object_with_description), [&](auto member) {
         std::cout << separator.c_str() << member.name().c_str() << ": { ";
 
+        // Using a custom flag if it exists
         auto&& descr = member.flags().find_flag(tmdesc::type_t<additional_description_tag>{});
         descr.if_some(
             [&](auto descr) { std::cout << "description: \"" << descr.c_str() << "\", "; });
 
         std::cout << "value: ";
-        print(member.get());
+        print(member.get()); // get reference to object member, const reference in this case
         std::cout << " }";
 
         separator = ", ";
