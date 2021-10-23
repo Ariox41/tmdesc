@@ -6,7 +6,6 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "algorithm/for_each.hpp"
 #include "static_type_info.hpp"
 
 namespace tmdesc {
