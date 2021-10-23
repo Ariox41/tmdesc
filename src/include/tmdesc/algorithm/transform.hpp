@@ -30,6 +30,7 @@ public:
     }
 };
 
+/// Apply function to each element of tuple-like object and return Consumer<Result...>(results...)
 template <template <class...> class Consumer> constexpr transform_t<Consumer> transform_to{};
 
 template <template <class...> class Consumer> struct transform2_t {
@@ -60,7 +61,21 @@ public:
     }
 };
 
-template <template <class...> class Consumer>
-constexpr transform2_t<Consumer> transform2_to{};
+/// Apply function to each pair of same index element of tuple-like object,
+/// and return Consumer<Result...>(results...)
+template <template <class...> class Consumer> constexpr transform2_t<Consumer> transform2_to{};
+
+namespace detail {
+template <class T> struct to_struct_helper { template <class... Args> using apply = T; };
+} // namespace detail
+
+/// Apply function to each element of tuple-like object and return T{results...}
+template <class T>
+constexpr transform_t<detail::to_struct_helper<T>::template apply> transform_to_type;
+
+/// Apply function to each pair of same index element of tuple-like object,
+/// and return T{results...}
+template <class T>
+constexpr transform2_t<detail::to_struct_helper<T>::template apply> transform2_to_type;
 
 } // namespace tmdesc
