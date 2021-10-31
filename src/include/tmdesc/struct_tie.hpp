@@ -13,18 +13,18 @@ namespace tmdesc {
 struct struct_tie_t {
 private:
     template <class StructRef> struct get_visitor {
-        StructRef&& ref;
+        StructRef ref;
         template <class MemberInfo>
         constexpr decltype(auto) operator()(const MemberInfo& mem_info) const noexcept {
-            return mem_info.get(ref);
+            return mem_info.get(static_cast<StructRef>(ref));
         }
     };
 
 public:
-    template <class T, class Enable = std::enable_if_t<has_type_info_v<meta::remove_cvref_t<T>>>>
+    template <class T, class Enable = std::enable_if_t<has_type_info_v<std::decay_t<T>>>>
     constexpr auto operator()(T&& struct_) const noexcept {
-        return transform_to<tuple>(static_members_info_v<meta::remove_cvref_t<T>>,
-                                   get_visitor<T&&>{struct_});
+        return transform_to<::tmdesc::tuple>(static_members_info_v<std::decay_t<T>>,
+                                             get_visitor<T&&>{static_cast<T&&>(struct_)});
     }
 };
 constexpr struct_tie_t struct_tie{};

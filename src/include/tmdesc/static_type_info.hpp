@@ -38,7 +38,7 @@ template <class T> constexpr bool has_type_info_v = has_type_info<T>::value;
 // Prefer to use tuple_element_t in `struct_as_tuple.hpp`
 template <std::size_t I, class T>
 using member_type_at_t =
-    typename meta::remove_cvref_t<decltype(get<I>(static_members_info_v<T>))>::member_type;
+    typename std::decay_t<decltype(get<I>(static_members_info_v<T>))>::member_type;
 
 // Prefer to use tuple_size in `struct_as_tuple.hpp`
 template <class T>

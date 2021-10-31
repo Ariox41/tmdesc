@@ -16,7 +16,7 @@ template <std::size_t I, class T> constexpr T&& get_impl(::tmdesc::detail::tuple
 
 // faster than overload
 template <std::size_t I, class Tuple,
-          std::enable_if_t<::tmdesc::is_tuple_v<::tmdesc::meta::remove_cvref_t<Tuple>>, bool> = true>
+          std::enable_if_t<::tmdesc::is_tuple_v<::std::decay_t<Tuple>>, bool> = true>
 constexpr decltype(auto) get(Tuple&& t) noexcept {
     return ::bench::get_impl<I>(std::forward<Tuple>(t));
 }

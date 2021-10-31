@@ -30,7 +30,7 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
     constexpr flag_map(::tmdesc::flag<Tags, Flags>... flags) noexcept
       : ::tmdesc::flag<Tags, Flags>{flags}... {
         static_assert(
-            meta::fast_and({meta::remove_cvref_t<
+            meta::fast_and({std::decay_t<
                 decltype(std::declval<flag_map<::tmdesc::flag<Tags, Flags>...>>().find_flag(
                     type_t<Tags>{}))>::is_some()...}),
             "tag duplication detected");

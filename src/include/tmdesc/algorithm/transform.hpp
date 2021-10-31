@@ -38,17 +38,17 @@ constexpr auto transform_to =
 template <template <class...> class Consumer> struct transform_t {
 private:
     template <class Tuple, class Fn, std::size_t... I>
-    static constexpr decltype(auto)
+    static constexpr Consumer<invoke_result_t<Fn, tuple_get_result_t<I, Tuple&&>>...>
     transform_impl(Tuple&& t, Fn&& fn, std::index_sequence<I...>) noexcept(
         noexcept(Consumer<invoke_result_t<Fn&, tuple_get_result_t<I, Tuple&&>>...>{
             invoke(std::declval<Fn&>(), std::declval<tuple_get_result_t<I, Tuple&&>>())...})) {
-        return Consumer<invoke_result_t<Fn, tuple_get_result_t<I, Tuple&&>>...>{
+        return {
             invoke(static_cast<Fn&>(fn), get<I>(std::forward<Tuple>(t)))...};
     }
 
 public:
     template <class Tuple, class Fn>
-    constexpr decltype(auto) operator()(Tuple&& t, Fn&& fn) const
+    constexpr auto operator()(Tuple&& t, Fn&& fn) const
         noexcept(noexcept(transform_impl(std::declval<Tuple>(), std::declval<Fn>(),
                                          index_sequence_for_tuple<Tuple>{}))) {
         return transform_impl(std::forward<Tuple>(t), std::forward<Fn>(fn),

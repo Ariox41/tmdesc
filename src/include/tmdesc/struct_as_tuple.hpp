@@ -12,12 +12,12 @@ namespace tmdesc {
 /// The tuple_size of a type that `has_type_info` is equal to the number of type members
 template <class T>
 struct tuple_size<T, std::enable_if_t<has_type_info_v<T>>>
-  : public tuple_size<decltype(static_members_info_v<meta::remove_cvref_t<T>>)> {};
+  : public tuple_size<decltype(static_members_info_v<std::decay_t<T>>)> {};
 
 namespace detail {
 struct getter_for_struct_t {
     template <std::size_t I, class T> static constexpr decltype(auto) get_by_id(T&& s) noexcept {
-        constexpr auto member_getter = get<I>(static_members_info_v<meta::remove_cvref_t<T>>);
+        constexpr auto member_getter = get<I>(static_members_info_v<std::decay_t<T>>);
         return member_getter.get(std::forward<T>(s));
     }
 

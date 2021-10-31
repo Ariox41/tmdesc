@@ -60,7 +60,7 @@ TEST_CASE("tuple initialisation and get") {
     SUBCASE("simple struct_tie") {
         static constexpr foo::test_struct_1 s1{42, char(-42)};
         static constexpr auto tie = tmdesc::struct_tie(s1);
-        using tie_type = tmdesc::meta::remove_cvref_t<decltype (tie)>;
+        using tie_type = std::decay_t<decltype (tie)>;
 
         static_assert (std::is_same<tie_type, tmdesc::tuple<const int&, const char&>>{}, "");
 
@@ -70,7 +70,7 @@ TEST_CASE("tuple initialisation and get") {
     SUBCASE("mutable struct_tie") {
         foo::test_struct_1 s1{42, char(-42)};
         auto tie = tmdesc::struct_tie(s1);
-        using tie_type = tmdesc::meta::remove_cvref_t<decltype (tie)>;
+        using tie_type = std::decay_t<decltype (tie)>;
 
         static_assert (std::is_same<tie_type, tmdesc::tuple<int&, char&>>{}, "");
 
@@ -87,15 +87,34 @@ TEST_CASE("tuple initialisation and get") {
     }
     SUBCASE("complex struct_tie") {
         static constexpr foo::test_struct_2 s2{{42, char(-42)},555, {-21, char(21)}};
-        static constexpr auto tie = tmdesc::struct_tie(s2);
-        using tie_type = tmdesc::meta::remove_cvref_t<decltype (tie)>;
+        static constexpr auto s2_tie = tmdesc::struct_tie(s2);
 
-        static_assert (std::is_same<tie_type, tmdesc::tuple<const foo::test_struct_1&, const foo::test_struct_1&, const int&>>{}, "");
-        static_assert (noexcept (tmdesc::transform_to<tmdesc::tuple>(tmdesc::static_members_info_v<foo::test_struct_2>, ignore{}) ), "");
-        static_assert (noexcept (tmdesc::struct_tie(s2)), "");
+        STATIC_NOTHROW_CHECK(tmdesc::get<2>(s2_tie) == s2.v2_int); // the order in tmdesc_info, not in test_struct_2
+        STATIC_NOTHROW_CHECK(tmdesc::get<2>(s2_tie) == 555);
 
-        static constexpr auto second = tmdesc::struct_tie(tmdesc::get<1>(tie));
-        STATIC_NOTHROW_CHECK(tmdesc::struct_tie(s2.v3_s1) == second);
-        STATIC_NOTHROW_CHECK(s2.v2_int == tmdesc::get<2>(tie));
+        static constexpr  auto s2__v1_s1 = tmdesc::get<0>(s2_tie);
+        STATIC_NOTHROW_CHECK(s2__v1_s1.v1_int == 42);
+        STATIC_NOTHROW_CHECK(s2__v1_s1.v2_char ==  char(-42));
+
+        static constexpr auto s2__v1_s1_tie = tmdesc::struct_tie(s2__v1_s1);
+        STATIC_NOTHROW_CHECK(tmdesc::get<0>(s2__v1_s1_tie) == 42);
+        STATIC_NOTHROW_CHECK(tmdesc::get<1>(s2__v1_s1_tie) == -42);
+
+        SUBCASE("tie eual operator"){
+            STATIC_NOTHROW_CHECK(s2__v1_s1_tie == s2__v1_s1_tie);
+            STATIC_NOTHROW_CHECK(s2__v1_s1_tie <= s2__v1_s1_tie);
+            STATIC_NOTHROW_CHECK(s2__v1_s1_tie >= s2__v1_s1_tie);
+            STATIC_NOTHROW_CHECK(!(s2__v1_s1_tie > s2__v1_s1_tie));
+            STATIC_NOTHROW_CHECK(!(s2__v1_s1_tie < s2__v1_s1_tie));
+            STATIC_NOTHROW_CHECK(!(s2__v1_s1_tie != s2__v1_s1_tie));
+
+
+            STATIC_NOTHROW_CHECK(s2__v1_s1_tie == tmdesc::make_tuple(42, -42));
+            STATIC_NOTHROW_CHECK(s2__v1_s1_tie <= tmdesc::make_tuple(42, -42));
+            STATIC_NOTHROW_CHECK(s2__v1_s1_tie >= tmdesc::make_tuple(42, -42));
+            STATIC_NOTHROW_CHECK(!(s2__v1_s1_tie > tmdesc::make_tuple(42, -42)));
+            STATIC_NOTHROW_CHECK(!(s2__v1_s1_tie < tmdesc::make_tuple(42, -42)));
+            STATIC_NOTHROW_CHECK(!(s2__v1_s1_tie != tmdesc::make_tuple(42, -42)));
+        }
     }
 }

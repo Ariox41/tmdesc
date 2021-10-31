@@ -42,7 +42,7 @@ constexpr tuple<unwrap_ref_decay_t<Ts>...> make_tuple(Ts&&... ts) noexcept(
 template <class... Ts> constexpr tuple<Ts&...> tie(Ts&... ts) noexcept { return {ts...}; }
 
 template <class... Ts> struct tuple_getter<tuple<Ts...>> {
-    using type = detail::getter_for_tuple_t;
+    using type = detail::getter_by_id_for_tuple_t;
 };
 template <class... Ts> struct tuple_getter_by_type<tuple<Ts...>> {
     using type = detail::getter_by_type_for_tuple_t;

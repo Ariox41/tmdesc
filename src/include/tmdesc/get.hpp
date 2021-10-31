@@ -45,15 +45,15 @@ template <class T> using tuple_getter_by_type_t = typename tuple_getter_by_type<
 /// @return The `I`-th element of the tuple-like object `t`
 /// @tparam I - index of element
 template <std::size_t I, class Tuple> constexpr decltype(auto) get(Tuple&& t) noexcept {
-    return tuple_getter_t<meta::remove_cvref_t<Tuple>>::template get_by_id<I>(
-        std::forward<Tuple>(t));
+    return tuple_getter_t<std::decay_t<Tuple>>::template get_by_id<I>(
+                                                  static_cast<Tuple&&>(t));
 }
 
 /// @return Fine element with type T in the tuple-like object `t`
 /// @tparam T - exact type of element
 /// @note In general, the type `T` can be a tag, not only an element type
 template <class T, class Tuple> constexpr decltype(auto) get(Tuple&& t) noexcept {
-    return tuple_getter_by_type_t<meta::remove_cvref_t<Tuple>>::template get_by_type<T>(
+    return tuple_getter_by_type_t<std::decay_t<Tuple>>::template get_by_type<T>(
         std::forward<Tuple>(t));
 }
 

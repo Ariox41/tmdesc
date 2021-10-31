@@ -39,6 +39,7 @@ public:
     }
     constexpr member_type& get(owner_type& owner) const noexcept { return owner.*member_ptr; }
     constexpr member_type&& get(owner_type&& owner) const noexcept { return owner.*member_ptr; }
+    constexpr const member_type&& get(const owner_type&& owner) const noexcept { return owner.*member_ptr; }
 
     constexpr flag_map<> flags() const noexcept { return {}; }
 

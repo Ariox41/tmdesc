@@ -14,7 +14,7 @@ namespace tmdesc {
 /// @warning Never use this type directly, use it as an unknown type with a known interface.
 /// Only the interface is stable, but not the type name and template arguments.
 template <class Owner, std::size_t I> struct member_reference {
-    using owner_type = meta::remove_cvref_t<Owner>;
+    using owner_type = std::decay_t<Owner>;
     using reference_type =
         decltype(get<I>(static_members_info_v<owner_type>).get(std::declval<Owner>()));
     using value_type = member_type_at_t<I, owner_type>;
@@ -57,7 +57,7 @@ template <class T> struct object_members_view {
 
 struct members_view_t {
 
-    template <class T, std::enable_if_t<has_type_info_v<meta::remove_cvref_t<T>>, bool> = true>
+    template <class T, std::enable_if_t<has_type_info_v<std::decay_t<T>>, bool> = true>
     object_members_view<T&&> operator()(T&& object) const noexcept {
         return {std::forward<T>(object)};
     }
@@ -66,7 +66,7 @@ members_view_t members_view;
 
 template <class T>
 struct tuple_size<object_members_view<T>, std::enable_if_t<true>>
-  : public type_members_count<meta::remove_cvref_t<T>> {};
+  : public type_members_count<std::decay_t<T>> {};
 
 template <class T> struct tuple_getter<object_members_view<T>, std::enable_if_t<true>> {
     struct type {
