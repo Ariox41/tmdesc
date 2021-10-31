@@ -17,10 +17,12 @@ namespace detail {
 struct eq_visitor {
     bool& ok;
     template <class T, class U>
-    constexpr void operator()(const T& lha, const U& rha) noexcept(
-        noexcept(!(std::declval<const T&>() == std::declval<const U&>()))) {
+    constexpr void operator()(const T& lha_, const U& rha_) const
+        noexcept(noexcept(!(std::declval<const T&>() == std::declval<const U&>()))) {
+            auto&& _lha = lha_;
+            auto&& _rha = rha_;
         if (ok) {
-            if (!(lha == rha)) {
+            if (!(_lha == _rha)) {
                 ok = false;
             }
         }
@@ -30,10 +32,10 @@ struct less_visitor {
     bool& less;
     bool& eq;
     template <class T, class U>
-    constexpr void operator()(const T& lha, const U& rha) noexcept(
-        noexcept(std::declval<const T&>() <
-                 std::declval<const U&>()) && noexcept(std::declval<const U&>() <
-                                                       std::declval<const T&>())) {
+    constexpr void operator()(const T& lha, const U& rha) const
+        noexcept(noexcept(std::declval<const T&>() <
+                          std::declval<const U&>()) && noexcept(std::declval<const U&>() <
+                                                                std::declval<const T&>())) {
         if (eq) {
             if (lha < rha) {
                 eq   = false;
@@ -50,7 +52,8 @@ struct less_visitor {
 template <class... Ts, class... Us>
 constexpr std::enable_if_t<sizeof...(Ts) == sizeof...(Us), bool>
 operator==(const tuple<Ts...>& lha, const tuple<Us...>& rha) noexcept(
-    noexcept(for_each2(lha, rha, std::declval<detail::eq_visitor>()))) {
+    noexcept(for_each2(std::declval<const tuple<Ts...>&>(), std::declval<const tuple<Us...>&>(),
+                       std::declval<detail::eq_visitor>()))) {
     bool eq = true;
     for_each2(lha, rha, detail::eq_visitor{eq});
     return eq;

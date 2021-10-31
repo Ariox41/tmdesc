@@ -8,7 +8,6 @@
 find_package(Ruby 2.4 QUIET)
 if(NOT RUBY_EXECUTABLE)
     message(WARNING "Ruby >= 2.4 was not found; the metabench.cmake module can't be used.")
-    return()
 endif()
 
 set(TMDESC_METABENCH_SELF_FILE_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
@@ -31,6 +30,11 @@ add_custom_target(TMDESC_MATABENCH_ALL)
 # [NAME] - dataset readable name. Default: ${target}
 # [REPETITIONS] - repetitions count for each item. Default: 1
 function (tmdesc_metabench_add_dataset target erb_template_src dataset_generator)
+    if(NOT RUBY_EXECUTABLE)
+        add_library(${target} OBJECT EXCLUDE_FROM_ALL ${erb_template_src}) # for target link livrary
+        return()
+    endif()
+
     set(options)
     set(one_value_args NAME REPETITIONS)
     set(multi_value_args )
@@ -119,6 +123,10 @@ endfunction()
 # [XAXIS xaxis] - chart x axis title, default: "Input value"
 # [YAXIS yaxis] - chart y axis title, default: "Time, s"
 function(tmdesc_metabench_add_chart target)
+    if(NOT RUBY_EXECUTABLE)
+        return()
+    endif()
+
     set(options ALL)
     set(one_value_args TITLE XAXIS YAXIS)
     set(multi_value_args DATASETS)

@@ -47,14 +47,4 @@ template <class... Ts> struct tuple_getter<tuple<Ts...>> {
 template <class... Ts> struct tuple_getter_by_type<tuple<Ts...>> {
     using type = detail::getter_by_type_for_tuple_t;
 };
-
-// template <std::size_t I, class Tuple, std::enable_if_t<is_tuple_v<meta::remove_cvref_t<Tuple>>,
-// bool> = true> constexpr decltype(auto) get(Tuple&& t) noexcept {
-//    return detail::getter_for_tuple_t::template get_by_id<I>(std::forward<Tuple>(t));
-//}
-// template <class T, class Tuple, std::enable_if_t<is_tuple_v<meta::remove_cvref_t<Tuple>>, bool> =
-// true> constexpr decltype(auto) get(Tuple&& t) noexcept {
-//    return detail::getter_for_tuple_t::template get_by_type<T>(std::forward<Tuple>(t));
-//}
-
 } // namespace tmdesc

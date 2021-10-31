@@ -57,10 +57,14 @@ struct memptr_function_invoker_t : protected memptr_invoker_t {
 } // namespace detail
 
 struct invoke_t {
-    template <class R, class T, class... Args>
-    constexpr decltype(auto) operator()(R T::*memptr, Args&&... args) const noexcept {
+    template <class M, class... Args,
+              std::enable_if_t<std::is_member_pointer<std::decay_t<M>>::value, bool> = true>
+    constexpr decltype(auto) operator()(M memptr, Args&&... args) const noexcept(
+        noexcept(std::conditional_t<std::is_function<M>::value, detail::memptr_function_invoker_t,
+                                    detail::memptr_invoker_t>{}(std::declval<M>(),
+                                                                std::declval<Args>()...))) {
         using invoker =
-            std::conditional_t<std::is_function<R T::*>::value, detail::memptr_function_invoker_t,
+            std::conditional_t<std::is_function<M>::value, detail::memptr_function_invoker_t,
                                detail::memptr_invoker_t>;
         return invoker{}(memptr, std::forward<Args>(args)...);
     }
@@ -69,7 +73,7 @@ struct invoke_t {
               std::enable_if_t<!std::is_member_pointer<std::decay_t<Fn>>::value, bool> = true>
     constexpr decltype(auto) operator()(Fn&& fn, Args&&... args) const
         noexcept(noexcept(std::declval<Fn>()(std::declval<Args>()...))) {
-        return std::forward<Fn>(fn)(std::forward<Args>(args)...);
+        return static_cast<Fn&&>(fn)(static_cast<Args&&>(args)...);
     }
 };
 constexpr invoke_t invoke{};

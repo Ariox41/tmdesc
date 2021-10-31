@@ -41,7 +41,7 @@ constexpr auto tmdesc_info(tmdesc::type_t<test_struct_2>, tmdesc::info_builder<I
     CHECK(__VA_ARGS__)
 
 #define STATIC_NOTHROW_CHECK(...)             \
-    static_assert(__VA_ARGS__, "");           \
+    static_assert((__VA_ARGS__), "");           \
     static_assert(noexcept(__VA_ARGS__), ""); \
     CHECK(__VA_ARGS__)
 
@@ -93,7 +93,9 @@ TEST_CASE("tuple initialisation and get") {
         static_assert (std::is_same<tie_type, tmdesc::tuple<const foo::test_struct_1&, const foo::test_struct_1&, const int&>>{}, "");
         static_assert (noexcept (tmdesc::transform_to<tmdesc::tuple>(tmdesc::static_members_info_v<foo::test_struct_2>, ignore{}) ), "");
         static_assert (noexcept (tmdesc::struct_tie(s2)), "");
-        STATIC_NOTHROW_CHECK(tmdesc::struct_tie(s2.v3_s1) == tmdesc::struct_tie(tmdesc::get<1>(tie)));
+
+        static constexpr auto second = tmdesc::struct_tie(tmdesc::get<1>(tie));
+        STATIC_NOTHROW_CHECK(tmdesc::struct_tie(s2.v3_s1) == second);
         STATIC_NOTHROW_CHECK(s2.v2_int == tmdesc::get<2>(tie));
     }
 }

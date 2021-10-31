@@ -55,7 +55,7 @@ struct getter_for_tuple_t {
         return std::move(e).value;
     }
     template <std::size_t I, class T>
-    static constexpr T&& get_by_id(const tuple_item<I, T>&& e) noexcept {
+    static constexpr const T&& get_by_id(const tuple_item<I, T>&& e) noexcept {
         return std::move(e).value;
     }
 
@@ -80,7 +80,7 @@ struct getter_by_type_for_tuple_t {
         return std::move(e).value;
     }
     template <class T, std::size_t I>
-    static constexpr T&& get_by_type(const tuple_item<I, T>&& e) noexcept {
+    static constexpr const T&& get_by_type(const tuple_item<I, T>&& e) noexcept {
         return std::move(e).value;
     }
 };

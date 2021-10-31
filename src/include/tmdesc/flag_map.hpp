@@ -63,7 +63,7 @@ private:
 };
 
 template <> struct flag_map<> {
-    template <class Tag> constexpr meta::none find_flag(type_t<Tag> tag = {}) const noexcept {
+    template <class Tag> constexpr meta::none find_flag(type_t<Tag> = {}) const noexcept {
         return {};
     }
 };
