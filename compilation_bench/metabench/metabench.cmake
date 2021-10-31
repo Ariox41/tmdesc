@@ -7,7 +7,7 @@
 
 find_package(Ruby 2.4 QUIET)
 if(NOT RUBY_EXECUTABLE)
-    message(WARNING "Ruby >= 2.4 was not found; the metabench.cmake module can't be used.")
+    message(INFO "Ruby >= 2.4 was not found; the metabench.cmake module can't be used.")
 endif()
 
 set(TMDESC_METABENCH_SELF_FILE_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
