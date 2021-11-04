@@ -1,5 +1,4 @@
-#include "doctest.h"
-
+#include <doctest/doctest.h>
 #include <tmdesc/string_view.hpp>
 
 #define STATIC_CHECK(...) \

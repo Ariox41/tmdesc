@@ -1,6 +1,4 @@
-
-//#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include <doctest/doctest.h>
 #include <string>
 #include <tmdesc/algorithm/for_each.hpp>
 #include <tmdesc/struct_as_tuple.hpp>

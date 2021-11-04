@@ -1,3 +1,9 @@
+find_package(doctest)
+if(NOT doctest_FOUND)
+  message(WARNING "doctest not found, testing is not possible")
+  return()
+endif()
+
 set(TESTS_SRC
   main.cpp
   string_view_test.cpp
@@ -6,8 +12,8 @@ set(TESTS_SRC
   struct_tie_test.cpp
 )
 
-add_executable(all_tests ${TESTS_SRC} doctest.h)
-target_link_libraries(all_tests PRIVATE tmdesc)
+add_executable(all_tests ${TESTS_SRC})
+target_link_libraries(all_tests PRIVATE doctest::doctest tmdesc)
 
 set_property(TARGET all_tests PROPERTY CXX_STANDARD 14)
 
