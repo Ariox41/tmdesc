@@ -70,9 +70,12 @@ struct throw_visitor{
 //static_assert (!noexcept (tmdesc::repeat_n<4>(throw_visitor{})), "");
 
 static_assert (noexcept (tmdesc::for_each(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
-//static_assert (!noexcept (tmdesc::tuple_foreach(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
 
 static_assert (noexcept (tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
+
+// ?? msvc sometimes considers a function noexcept(true)
+// ?? if noexcept(false) is in its description, but `throw` is not called in its implementation.
+//static_assert (!noexcept (tmdesc::tuple_foreach(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
 //static_assert (!noexcept (tmdesc::transform_t<tuple>_to(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
 
 // implementation test
