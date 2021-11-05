@@ -33,7 +33,7 @@
 
 # QtCreator config file
 *.user
-
+CMakeLists.txt.user.*
 # vs code local configuration
 /.vscode/*
 
