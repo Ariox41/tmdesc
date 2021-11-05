@@ -1,11 +1,11 @@
 #include <doctest/doctest.h>
 
 #include <string>
-#include <tmdesc/tuple/tuple.hpp>
-#include <tmdesc/tuple/tuple_operators.hpp>
 #include <tmdesc/algorithm/for_each.hpp>
 #include <tmdesc/algorithm/transform.hpp>
 #include <tmdesc/string_view.hpp>
+#include <tmdesc/tuple/tuple.hpp>
+#include <tmdesc/tuple/tuple_operators.hpp>
 
 static_assert(std::is_trivial<tmdesc::tuple<>>{}, "");
 static_assert(std::is_trivial<tmdesc::tuple<int>>{}, "");
@@ -57,10 +57,10 @@ static_assert(!std::is_nothrow_copy_assignable<tmdesc::tuple<std::string, std::s
 static_assert(std::is_copy_constructible<tmdesc::tuple<std::string, std::string>>{}, "");
 static_assert(std::is_copy_assignable<tmdesc::tuple<std::string, std::string>>{}, "");
 
-struct nothrow_visitor{
-    template<class T> constexpr bool operator() (const T&)const noexcept{ return false;}
+struct nothrow_visitor {
+    template <class T> constexpr bool operator()(const T&) const noexcept { return false; }
 };
-struct throw_visitor{
+struct throw_visitor {
     template <class T> constexpr bool operator()(const T&) const noexcept(false) {
         throw "";
         return false;
@@ -69,9 +69,9 @@ struct throw_visitor{
 
 //static_assert (!noexcept (tmdesc::repeat_n<4>(throw_visitor{})), "");
 
-static_assert (noexcept (tmdesc::for_each(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
+static_assert(noexcept(tmdesc::for_each(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
 
-static_assert (noexcept (tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
+static_assert(noexcept(tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
 
 // ?? msvc sometimes considers a function noexcept(true)
 // ?? if noexcept(false) is in its description, but `throw` is not called in its implementation.
@@ -90,22 +90,36 @@ static_assert (noexcept (tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tupl
     CHECK(__VA_ARGS__)
 
 TEST_CASE("tuple initialisation and get") {
-    SUBCASE("empty tuple creation") {
+    SUBCASE("empty tuple constuctors and assigment") {
         constexpr tmdesc::tuple<> t;
-        constexpr tmdesc::tuple<> clone = t;
+        constexpr tmdesc::tuple<> cloned = t;
+        constexpr tmdesc::tuple<> moved  = std::move(cloned);
         tmdesc::tuple<> assigned;
-        assigned = clone;
-        (void)assigned;
+        assigned = moved;
+        tmdesc::tuple<> move_assigned;
+        move_assigned = std::move(assigned);
+        (void)move_assigned;
     }
-    SUBCASE("single element tuple creation") {
-        constexpr tmdesc::tuple<int> t{};
-        constexpr tmdesc::tuple<int> clone = t;
+    SUBCASE("single element tuple constuctors and assigment") {
+        constexpr tmdesc::tuple<int> t{42};
+        constexpr tmdesc::tuple<int> cloned = t;
+        constexpr tmdesc::tuple<int> moved  = std::move(cloned);
         tmdesc::tuple<int> assigned;
-        assigned = clone;
+        assigned = moved;
+        tmdesc::tuple<int> move_assigned;
+        move_assigned = std::move(assigned);
+        (void)move_assigned;
 
         SUBCASE("set and get") {
-            tmdesc::get<0>(assigned) = 42;
-            REQUIRE(tmdesc::get<0>(assigned) == 42);
+            tmdesc::get<0>(assigned) = 24;
+            REQUIRE(tmdesc::get<0>(assigned) == 24);
+            REQUIRE(tmdesc::get<0>(t) == 42);
+        }
+        SUBCASE("to tuple of reference") {
+            tmdesc::tuple<const int&> tuple_of_ref = assigned;
+            REQUIRE(tmdesc::get<0>(tuple_of_ref) == 42);
+            tmdesc::get<0>(assigned) = 11;
+            REQUIRE(tmdesc::get<0>(tuple_of_ref) == 11);
         }
     }
     SUBCASE("multiple element tuple creation") {
@@ -122,9 +136,9 @@ TEST_CASE("tuple initialisation and get") {
         }
     }
     SUBCASE("make_tuple") {
-       static constexpr tmdesc::zstring_view str = "30";
-        static constexpr auto t1          = tmdesc::make_tuple(str, 30, 42, 80);
-       static constexpr auto t2          = t1;
+        static constexpr tmdesc::zstring_view str = "30";
+        static constexpr auto t1                  = tmdesc::make_tuple(str, 30, 42, 80);
+        static constexpr auto t2                  = t1;
         STATIC_NOTHROW_CHECK(tmdesc::get<0>(t2) == str);
         STATIC_NOTHROW_CHECK(tmdesc::get<1>(t2) == 30);
         STATIC_NOTHROW_CHECK(tmdesc::get<2>(t2) == 42);

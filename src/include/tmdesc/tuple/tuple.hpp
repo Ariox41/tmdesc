@@ -23,6 +23,7 @@ struct tuple : public detail::tuple_impl<std::make_index_sequence<sizeof...(Ts)>
     constexpr tuple& operator=(tuple&&) = default;
 
     using detail::tuple_impl<std::make_index_sequence<sizeof...(Ts)>, Ts...>::tuple_impl;
+    using detail::tuple_impl<std::make_index_sequence<sizeof...(Ts)>, Ts...>::operator=;
 };
 
 template <class T> struct is_tuple : std::false_type {};

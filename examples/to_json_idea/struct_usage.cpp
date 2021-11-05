@@ -21,7 +21,8 @@ struct print_visitor {
             std::cout << separator;
             separator = ", ";
 
-            std::cout << '"' << member_ref.name();
+            constexpr auto name = member_ref.name();
+            std::cout << '"' << name;
             constexpr auto info = member_ref.flags().find_flag(tmdesc::type_t<flags::AdditionInfoTag>{});
             info.if_some([&](auto str) { std::cout << "[" << str << "]"; });
             std::cout << R"(": )";

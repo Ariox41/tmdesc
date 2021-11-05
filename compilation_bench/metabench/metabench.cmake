@@ -105,7 +105,7 @@ function (tmdesc_metabench_add_dataset target erb_template_src dataset_generator
         -e "IO.write('${measure_result_path}', JSON.pretty_generate(out))"
         SOURCES ${erb_template_full_path}
         DEPENDS ${erb_template_full_path} ${target}
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         VERBATIM USES_TERMINAL)
 
     # alias for time measure target, and target for IDE prject tree view

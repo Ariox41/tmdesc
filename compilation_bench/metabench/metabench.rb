@@ -33,7 +33,7 @@ def build(target, cpp_file, compilation_command, exe_file)
     #     sleep(0.1)
     # end
     
-    raise "\nError while c++ file compilation\n\nstdout:\n#{stdout}\n\nstderr:\n#{stderr}\n" unless status.success?
+    raise "\nError while c++ file compilation\n\nstdout:\n#{stdout}\n\nstderr:\n#{stderr}\n\nCOmpilation command:\n#{compilation_command}" unless status.success?
 
     #match = stdout.match(/\[metabench compilation time: (.+)\]/i)
     # raise "\nCould not find [metabench compilation time: ...] in the output. Are you using a Ninja or Make generator?\n\nFull stdout:\n" + stdout  if match.nil?
@@ -65,6 +65,9 @@ def measure(target, range_expr_str, erb_template, cpp_file,  repetitions, exe_fi
     begin
         range = eval(range_expr_str).to_a
         exe_file = exe_file.gsub('.tmdesc_metabench_pattern.cpp', "")
+
+        exe_dirname = File.dirname(exe_file)
+        FileUtils.mkdir_p(exe_dirname) unless File.directory?(exe_dirname)
     
         out = {}
         out['target'] = target
