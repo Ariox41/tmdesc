@@ -64,7 +64,8 @@ public:
 
     /// Converting copy-assigment
     template <class... Us,
-              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
+              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Us) >= 1)>,
+                                                     meta::bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
                                                      meta::negation<std::is_same<tuple<Ts...>, tuple<Us...>>>,
                                                      meta::fast_values_and<std::is_assignable<Ts&, const Us&>...>>,
                                bool> = true>
@@ -76,7 +77,8 @@ public:
 
     /// Converting move-assigment
     template <class... Us,
-              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
+              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Us) >= 1)>,
+                                                     meta::bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
                                                      meta::negation<std::is_same<tuple<Ts...>, tuple<Us...>>>,
                                                      meta::fast_values_and<std::is_assignable<Ts&, Us&&>...>>,
                                bool> = true>
