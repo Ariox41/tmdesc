@@ -73,8 +73,8 @@ static_assert(noexcept(tmdesc::for_each(tmdesc::make_tuple(1, '2', "42"), nothro
 
 static_assert(noexcept(tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
 
-// ?? msvc sometimes considers a function noexcept(true)
-// ?? if noexcept(false) is in its description, but `throw` is not called in its implementation.
+// ?? msvc sometimes considers a function as `noexcept(true)`
+// ?? if `noexcept(false)` is in its description, but `throw` is not called in its implementation.
 //static_assert (!noexcept (tmdesc::tuple_foreach(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
 //static_assert (!noexcept (tmdesc::transform_t<tuple>_to(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
 
@@ -116,10 +116,14 @@ TEST_CASE("tuple initialisation and get") {
             REQUIRE(tmdesc::get<0>(t) == 42);
         }
         SUBCASE("to tuple of reference") {
-            tmdesc::tuple<const int&> tuple_of_ref = assigned;
-            REQUIRE(tmdesc::get<0>(tuple_of_ref) == 42);
-            tmdesc::get<0>(assigned) = 11;
-            REQUIRE(tmdesc::get<0>(tuple_of_ref) == 11);
+            tmdesc::tuple<const int&> lvalue_ref_tuple = move_assigned;
+            tmdesc::tuple<int&&> rvalue_ref_tuple = std::move(move_assigned);
+
+            REQUIRE(tmdesc::get<0>(lvalue_ref_tuple) == 42);
+            REQUIRE(tmdesc::get<0>(rvalue_ref_tuple) == 42);
+            tmdesc::get<0>(move_assigned) = 11;
+            REQUIRE(tmdesc::get<0>(lvalue_ref_tuple) == 11);
+            REQUIRE(tmdesc::get<0>(rvalue_ref_tuple) == 11);
         }
     }
     SUBCASE("multiple element tuple creation") {
