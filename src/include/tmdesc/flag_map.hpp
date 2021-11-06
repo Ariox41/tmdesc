@@ -20,8 +20,8 @@ template <class... Flags> struct flag_map;
 
 template <class... Tags, class... Flags>
 struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Flags>... {
-    constexpr flag_map() = default;
-    constexpr flag_map(flag_map&&) = default;
+    constexpr flag_map()                = default;
+    constexpr flag_map(flag_map&&)      = default;
     constexpr flag_map(const flag_map&) = default;
 
     constexpr flag_map& operator=(flag_map&&) = delete;
@@ -30,9 +30,8 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
     constexpr flag_map(::tmdesc::flag<Tags, Flags>... flags) noexcept
       : ::tmdesc::flag<Tags, Flags>{flags}... {
         static_assert(
-            meta::fast_and({std::decay_t<
-                decltype(std::declval<flag_map<::tmdesc::flag<Tags, Flags>...>>().find_flag(
-                    type_t<Tags>{}))>::is_some()...}),
+            meta::fast_and_v<std::decay_t<decltype(std::declval<flag_map<::tmdesc::flag<Tags, Flags>...>>().find_flag(
+                type_t<Tags>{}))>::is_some()...>,
             "tag duplication detected");
     }
 
@@ -52,20 +51,14 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
 private:
     // return some<reference> because `flag_map` must have a static lifetime
     template <class Tag, class Flag>
-    static constexpr meta::some<const Flag&>
-    find_flag_impl(type_t<Tag>, const ::tmdesc::flag<Tag, Flag>* f) noexcept {
+    static constexpr meta::some<const Flag&> find_flag_impl(type_t<Tag>, const ::tmdesc::flag<Tag, Flag>* f) noexcept {
         return {f->value};
     }
-    template <class Tag>
-    static constexpr meta::none find_flag_impl(type_t<Tag>, const void*) noexcept {
-        return {};
-    }
+    template <class Tag> static constexpr meta::none find_flag_impl(type_t<Tag>, const void*) noexcept { return {}; }
 };
 
 template <> struct flag_map<> {
-    template <class Tag> constexpr meta::none find_flag(type_t<Tag> = {}) const noexcept {
-        return {};
-    }
+    template <class Tag> constexpr meta::none find_flag(type_t<Tag> = {}) const noexcept { return {}; }
 };
 
 } // namespace tmdesc

@@ -9,8 +9,9 @@ using ::tmdesc::get;
 template <class Seq> struct repeat_n_t;
 template <std::size_t... I> struct repeat_n_t<std::index_sequence<I...>> {
     template <class Fn>
-    constexpr void operator()(Fn&& fn) noexcept(::tmdesc::meta::fast_and(
-        {noexcept(::tmdesc::invoke(std::declval<Fn>(), std::integral_constant<std::size_t, I>{}))...})) {
+    constexpr void operator()(Fn&& fn) noexcept(
+        ::tmdesc::meta::fast_and_v<noexcept(::tmdesc::invoke(std::declval<Fn>(),
+                                                             std::integral_constant<std::size_t, I>{}))...>) {
         (void)std::initializer_list<bool>{
             true,
             ((void)::tmdesc::invoke(std::forward<Fn>(fn), std::integral_constant<std::size_t, I>{}), void(), true)...};

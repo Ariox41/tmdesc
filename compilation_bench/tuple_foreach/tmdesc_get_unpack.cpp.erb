@@ -30,7 +30,7 @@ private:
 
         template <class... Args>
         constexpr void operator()(Args&&... args) const
-            noexcept(::tmdesc::meta::fast_and({::tmdesc::is_nothrow_invokable_v<Fn, Args&&>...})) {
+            noexcept(::tmdesc::meta::fast_and_v<::tmdesc::is_nothrow_invokable_v<Fn, Args&&>...>) {
             (void)std::initializer_list<bool>{true, ((void)fn(std::forward<Args>(args)), void(), true)...};
         }
     };

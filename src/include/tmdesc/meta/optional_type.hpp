@@ -66,7 +66,7 @@ private:
 
 public:
     /// @return a stored value
-    /// @note This method can be used in conjunction with `if constexpr(if_some())`,
+    /// @note This method can be used in recursive_and with `if constexpr(if_some())`,
     /// but for compatibility with c++14, you need to use `if_some` and `if_none`.
     const T& value() const noexcept { return value_; }
 

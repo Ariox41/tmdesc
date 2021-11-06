@@ -17,7 +17,7 @@ template <std::size_t I, class T> constexpr T&& get(::tmdesc::detail::tuple_item
 
 template <class Tuple, class Fn, std::size_t... I>
 constexpr void tuple_foreach_impl(Tuple&& t, Fn&& fn, std::index_sequence<I...>) noexcept(
-    ::tmdesc::meta::fast_and({noexcept(std::declval<Fn>()(get<I>(std::declval<Tuple>())))...})) {
+    ::tmdesc::meta::fast_and_v<noexcept(std::declval<Fn>()(get<I>(std::declval<Tuple>())))...>) {
     (void)std::initializer_list<bool>{true, ((void)fn(get<I>(std::forward<Tuple>(t))), void(), true)...};
 }
 

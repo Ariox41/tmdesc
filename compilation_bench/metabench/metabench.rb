@@ -77,7 +77,7 @@ def measure(target, range_expr_str, erb_template, cpp_file,  repetitions, exe_fi
         compilation_command = IO.read(compilation_command_file)
     
         $stderr.write("### tmdesc metabench #{target}..... 0/#{range.size}")
-        range.each_with_index do |n, index|
+        range.reverse_each.each_with_index do |n, index|
             measure_code_compilation_time = -> (code){
                 IO.write(cpp_file, code)
             

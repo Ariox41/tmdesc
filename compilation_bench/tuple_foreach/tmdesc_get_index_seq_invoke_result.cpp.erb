@@ -10,7 +10,7 @@ template <class Seq> struct tuple_foreach_impl_t;
 template <std::size_t... I> struct tuple_foreach_impl_t<std::index_sequence<I...>> {
     template <class Tuple, class Fn>
     constexpr void operator()(Tuple&& t, Fn&& fn) const noexcept(
-        ::tmdesc::meta::fast_and({::tmdesc::is_nothrow_invokable_v<Fn, ::tmdesc::tuple_get_result_t<I, Tuple>>...})) {
+        ::tmdesc::meta::fast_and_v<::tmdesc::is_nothrow_invokable_v<Fn, ::tmdesc::tuple_get_result_t<I, Tuple>>...>) {
         (void)std::initializer_list<bool>{
             true, ((void)::tmdesc::invoke(std::forward<Fn>(fn), get<I>(std::forward<Tuple>(t))), void(), true)...};
     }

@@ -23,7 +23,7 @@ constexpr decltype(auto) get(Tuple&& t) noexcept {
 
 template <class Tuple, class Fn, std::size_t... I>
 constexpr void tuple_foreach_impl(Tuple&& t, Fn&& fn, std::index_sequence<I...>) noexcept(
-    ::tmdesc::meta::fast_and({noexcept(::tmdesc::invoke(std::declval<Fn>(), ::bench::get<I>(std::declval<Tuple>())))...})) {
+    ::tmdesc::meta::fast_and_v<noexcept(::tmdesc::invoke(std::declval<Fn>(), ::bench::get<I>(std::declval<Tuple>())))...>) {
     (void)std::initializer_list<bool>{
         true, ((void)::tmdesc::invoke(std::forward<Fn>(fn), ::bench::get<I>(std::forward<Tuple>(t))), void(), true)...};
 }
