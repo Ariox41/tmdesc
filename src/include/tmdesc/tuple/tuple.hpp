@@ -102,13 +102,24 @@ private:
     }
 };
 
+/// Checks that T is ::tmdesc::tuple
+/// \warning `is_tuple` is not a customisation point
 template <class T> struct is_tuple : std::false_type {};
 template <class... Ts> struct is_tuple<tuple<Ts...>> : std::true_type {};
+
+/// @ref is_tuple helper
 template <class T> constexpr bool is_tuple_v = is_tuple<T>::value;
 
+/// Specialisation for @ref tuple
 template <class... Ts>
 struct tuple_size<tuple<Ts...>, std::enable_if_t<true>> : public std::integral_constant<std::size_t, sizeof...(Ts)> {};
 
+/// @see std::make_tuple
+#ifdef TMDESC_DOXYGEN
+constexpr auto make_tuple = [](auto&&... args) -> tuple<unwrap_ref_decay_t<decltype(args)>...> {
+    return {std::forward<decltype(args)>(args)...};
+};
+#else
 struct make_tuple_t {
     template <class... Ts>
     constexpr tuple<unwrap_ref_decay_t<Ts>...> operator()(Ts&&... ts) const
@@ -117,19 +128,35 @@ struct make_tuple_t {
     }
 };
 constexpr make_tuple_t make_tuple{};
+#endif
 
+/// @see std::tie
+#ifdef TMDESC_DOXYGEN
+constexpr auto tie = [](auto&... args) -> tuple<decltype(args)&...> { return {args...}; };
+#else
 struct tie_t {
     template <class... Ts> constexpr tuple<Ts&...> operator()(Ts&... ts) const noexcept { return {ts...}; }
 };
 constexpr tie_t tie{};
+#endif
 
+/// @see std::forward_as_tuple
+#ifdef TMDESC_DOXYGEN
+constexpr auto forward_as_tuple = [](auto&&... args) -> tuple<decltype(args)&&...> {
+    return {std::forward<decltype(args)>(args)...};
+};
+#else
 struct forward_as_tuple_t {
     template <class... Ts> constexpr tuple<Ts&&...> operator()(Ts&&... ts) const noexcept {
         return {std::forward<Ts>(ts)...};
     }
 };
 constexpr forward_as_tuple_t forward_as_tuple{};
+#endif
 
+/// Specialisation for @ref tuple
 template <class... Ts> struct tuple_getter<tuple<Ts...>> { using type = detail::getter_by_id_for_tuple_t; };
+
+/// Specialisation for @ref tuple
 template <class... Ts> struct tuple_getter_by_type<tuple<Ts...>> { using type = detail::getter_by_type_for_tuple_t; };
 } // namespace tmdesc
