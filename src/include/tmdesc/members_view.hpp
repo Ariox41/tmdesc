@@ -62,7 +62,7 @@ struct members_view_t {
         return {std::forward<T>(object)};
     }
 };
-members_view_t members_view;
+constexpr members_view_t members_view;
 
 template <class T>
 struct tuple_size<object_members_view<T>, std::enable_if_t<true>>
