@@ -44,17 +44,17 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
         @return @ref meta::some with flag value if the flag is found,
         or @ref meta::none if not found
      */
-    template <class Tag> constexpr auto find_flag(type_t<Tag> tag = {}) const noexcept {
-        return find_flag_impl(tag, this);
+    template <class Tag> constexpr auto find_flag(type_t<Tag> = {}) const noexcept {
+        return find_flag_impl<Tag>(this);
     }
 
 private:
     // return some<reference> because `flag_map` must have a static lifetime
     template <class Tag, class Flag>
-    static constexpr meta::some<const Flag&> find_flag_impl(type_t<Tag>, const ::tmdesc::flag<Tag, Flag>* f) noexcept {
+    static constexpr meta::some<const Flag&> find_flag_impl(const ::tmdesc::flag<Tag, Flag>* f) noexcept {
         return {f->value};
     }
-    template <class Tag> static constexpr meta::none find_flag_impl(type_t<Tag>, const void*) noexcept { return {}; }
+    template <class Tag> static constexpr meta::none find_flag_impl(const void*) noexcept { return {}; }
 };
 
 template <> struct flag_map<> {
