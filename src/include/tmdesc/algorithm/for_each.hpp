@@ -18,7 +18,7 @@ namespace tmdesc {
     A tuple-like object with `get` and `tuple_size` operations
 
     @param fn
-    A unary invokable object overloaded for each element of the `t`
+    A unary invocable object overloaded for each element of the `t`
  */
 #ifdef TMDESC_DOXYGEN
 constexpr auto for_each = [](auto&& t, auto&& fn) -> void {

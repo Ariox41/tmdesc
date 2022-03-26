@@ -6,14 +6,14 @@
 # The original idea is taken from https://github.com/ldionne/metabench
 
 find_package(Ruby 2.4 QUIET)
-if(NOT RUBY_EXECUTABLE)
+if(NOT RUBY_EXECUTABLE) 
     message(INFO "Ruby >= 2.4 was not found; the metabench.cmake module can't be used.")
 endif()
 
 set(TMDESC_METABENCH_SELF_FILE_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 # Global target for bench all
-add_custom_target(TMDESC_MATABENCH_ALL)
+add_custom_target(tmdesc_metabench_all)
 
 
 # Register dataset
@@ -24,7 +24,7 @@ add_custom_target(TMDESC_MATABENCH_ALL)
 # erb_template_src - the ERB templite file for c++ file generation.
 #                    @item variable available in the erb template.
 #                    The time is calculated as the difference between compiling code with defined METABENCH macro and without it
-
+#
 # dataset_generator - ruby expression for input array generation.
 #                     The @item variable in erb template is an input array item.
 # [NAME] - dataset readable name. Default: ${target}
@@ -161,10 +161,10 @@ function(tmdesc_metabench_add_chart target)
             -e "y_axis = '${ARGS_YAXIS}'"
             -e "data = '${json_data_sets}'.split(';').map { |path| IO.read(path) }"
             -e "html = ERB.new(File.read('${html_erb_template_path}')).result(binding)"
-            -e "FileUtils.mkdir_p(File.dirname('${output_path}'))"
+            -e "begin; FileUtils.mkdir_p(File.dirname('${output_path}')); rescue => exception; puts exception.backtrace; raise; end "
             -e "IO.write('${output_path}', html)"
         DEPENDS ${datasets_targets} ${json_data_sets} "${html_erb_template_path}"
-        VERBATIM
+        VERBATIM USES_TERMINAL
     )
     if(ARGS_ALL)
         add_custom_target(${target} ALL DEPENDS "${output_path}")
@@ -172,5 +172,5 @@ function(tmdesc_metabench_add_chart target)
         add_custom_target(${target} DEPENDS "${output_path}")
     endif()
 
-    add_dependencies(TMDESC_MATABENCH_ALL ${target})
+    add_dependencies(tmdesc_metabench_all ${target})
 endfunction()

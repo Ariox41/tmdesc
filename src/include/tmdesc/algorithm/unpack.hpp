@@ -13,7 +13,7 @@ namespace tmdesc {
 @param t
     A tuple-like object with `get` and `tuple_size` implementation
 @param fn
-    A invokable object that accepts a set of tuple elements as a set of arguments
+    A invocable object that accepts a set of tuple elements as a set of arguments
 @return `fn` invoke result
 */
 #ifdef TMDESC_DOXYGEN
@@ -45,7 +45,7 @@ constexpr unpack_t unpack{};
 @param t
     A tuple-like object with `get` and `tuple_size` implementation
 @param fn
-    A invokable object that accepts a set of tuple elements as a set of arguments
+    A invocable object that accepts a set of tuple elements as a set of arguments
 @return `fn` invoke result
 */
 #ifdef TMDESC_DOXYGEN

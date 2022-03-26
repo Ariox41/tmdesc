@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../functional/reference_wrapper_helpers.hpp"
+#include "../functional/ref_obj.hpp"
 #include "../get.hpp"
 #include "detail/tuple.hpp"
 #include <utility>
@@ -122,9 +122,10 @@ constexpr auto make_tuple = [](auto&&... args) -> tuple<unwrap_ref_decay_t<declt
 #else
 struct make_tuple_t {
     template <class... Ts>
-    constexpr tuple<unwrap_ref_decay_t<Ts>...> operator()(Ts&&... ts) const
-        noexcept(meta::fast_values_and_v<std::is_nothrow_constructible<unwrap_ref_decay_t<Ts>, Ts>...>) {
-        return tuple<unwrap_ref_decay_t<Ts>...>{std::forward<Ts>(ts)...};
+    constexpr auto operator()(Ts&&... ts) const //
+        noexcept(meta::fast_values_and_v<
+                 std::is_nothrow_constructible<try_unwrap_ref_obj_type_t<std::decay_t<Ts>>, Ts>...>) {
+        return tuple<try_unwrap_ref_obj_type_t<std::decay_t<Ts>>...>{std::forward<Ts>(ts)...};
     }
 };
 constexpr make_tuple_t make_tuple{};
@@ -154,9 +155,9 @@ struct forward_as_tuple_t {
 constexpr forward_as_tuple_t forward_as_tuple{};
 #endif
 
-/// Specialisation for @ref tuple
+/// Specialization for @ref tuple
 template <class... Ts> struct tuple_getter<tuple<Ts...>> { using type = detail::getter_by_id_for_tuple_t; };
 
-/// Specialisation for @ref tuple
+/// Specialization for @ref tuple
 template <class... Ts> struct tuple_getter_by_type<tuple<Ts...>> { using type = detail::getter_by_type_for_tuple_t; };
 } // namespace tmdesc

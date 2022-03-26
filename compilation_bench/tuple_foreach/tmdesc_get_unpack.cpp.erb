@@ -30,7 +30,7 @@ private:
 
         template <class... Args>
         constexpr void operator()(Args&&... args) const
-            noexcept(::tmdesc::meta::fast_and_v<::tmdesc::is_nothrow_invokable_v<Fn, Args&&>...>) {
+            noexcept(::tmdesc::meta::fast_and_v<::tmdesc::is_nothrow_invocable_v<Fn, Args&&>...>) {
             (void)std::initializer_list<bool>{true, ((void)fn(std::forward<Args>(args)), void(), true)...};
         }
     };
@@ -38,7 +38,7 @@ private:
 public:
     template <class Tuple, class Fn>
     constexpr void operator()(Tuple&& t, Fn&& fn) const
-        noexcept(::tmdesc::is_nothrow_invokable_v<unpack_t, Tuple, on_each<Fn&&>>) {
+        noexcept(::tmdesc::is_nothrow_invocable_v<unpack_t, Tuple, on_each<Fn&&>>) {
         unpack(std::forward<Tuple>(t), on_each<Fn&&>{std::forward<Fn>(fn)});
     }
 };
