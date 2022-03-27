@@ -19,11 +19,19 @@ namespace tmdesc {
         - no `ref<Derived>` to `ref<Base>`
     @note #include <functional> requared for  `std::reference_wrapper`
     @note `std::reference_wrapper` does not have a constexpr constructor before c++20
-        
+
     @see ref_cast for explicit conversions
     @see pointer_to_ref for explicit pointer dereference
 */
 template <class T> using ref_obj = std::reference_wrapper<T>;
+
+template <class T> constexpr ref_obj<T> ref(T& v) noexcept { return {v}; }
+template <class T> constexpr ref_obj<T> ref(ref_obj<T> v) noexcept { return v; }
+template <class T> constexpr void ref(const T&& v) = delete;
+
+template <class T> constexpr ref_obj<const T> cref(T& v) noexcept { return {v}; }
+template <class T> constexpr ref_obj<const T> cref(ref_obj<T> v) noexcept { return v; }
+template <class T> constexpr void cref(const T&& v) = delete;
 
 template <class T> struct is_ref_obj : std::false_type {};
 template <class U> struct is_ref_obj<ref_obj<U>> : std::true_type {};

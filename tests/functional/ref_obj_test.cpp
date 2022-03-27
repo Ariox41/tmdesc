@@ -29,8 +29,8 @@ TEST_SUITE("ref_obj cast") {
         static_assert(std::is_same<decltype(refConstBase), tmdesc::ref_obj<const Base>>::value, "");
     }
 }
-TEST_SUITE("pointer to ref_obj") {
-    int v{};
+TEST_CASE("pointer to ref_obj") {
+    int v{42};
     int* ptr    = &v;
     auto refObj = tmdesc::pointer_to_ref(ptr);
     static_assert(std::is_same<decltype(refObj), tmdesc::ref_obj<int>>::value, "");
@@ -38,4 +38,6 @@ TEST_SUITE("pointer to ref_obj") {
     const int* constPtr = ptr;
     auto refConstObj    = tmdesc::pointer_to_ref(constPtr);
     static_assert(std::is_same<decltype(refConstObj), tmdesc::ref_obj<const int>>::value, "");
+
+    CHECK(refConstObj.get() == v);
 }
