@@ -8,7 +8,7 @@
 #pragma once
 
 #include "meta/logical_operations.hpp"
-#include "meta/optional_type.hpp"
+#include "functional/optional.hpp"
 #include "meta/type_traits.hpp"
 #include "type_description.hpp"
 namespace tmdesc {
@@ -30,8 +30,8 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
     constexpr flag_map(::tmdesc::flag<Tags, Flags>... flags) noexcept
       : ::tmdesc::flag<Tags, Flags>{flags}... {
         static_assert(
-            meta::fast_and_v<std::decay_t<decltype(std::declval<flag_map<::tmdesc::flag<Tags, Flags>...>>().find_flag(
-                type_t<Tags>{}))>::is_some()...>,
+            meta::fast_and_v<is_some<std::decay_t<decltype(std::declval<flag_map<::tmdesc::flag<Tags, Flags>...>>().find_flag(
+                type_t<Tags>{}))>>::value...>,
             "tag duplication detected");
     }
 
@@ -51,14 +51,14 @@ struct flag_map<::tmdesc::flag<Tags, Flags>...> : public ::tmdesc::flag<Tags, Fl
 private:
     // return some<reference> because `flag_map` must have a static lifetime
     template <class Tag, class Flag>
-    static constexpr meta::some<const Flag&> find_flag_impl(const ::tmdesc::flag<Tag, Flag>* f) noexcept {
+    static constexpr some_t<const Flag&> find_flag_impl(const ::tmdesc::flag<Tag, Flag>* f) noexcept {
         return {f->value};
     }
-    template <class Tag> static constexpr meta::none find_flag_impl(const void*) noexcept { return {}; }
+    template <class Tag> static constexpr none_t find_flag_impl(const void*) noexcept { return {}; }
 };
 
 template <> struct flag_map<> {
-    template <class Tag> constexpr meta::none find_flag(type_t<Tag> = {}) const noexcept { return {}; }
+    template <class Tag> constexpr none_t find_flag(type_t<Tag> = {}) const noexcept { return {}; }
 };
 
 } // namespace tmdesc

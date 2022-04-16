@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 #include <tmdesc/type_description.hpp>
-#include <tmdesc/tuple/tuple_operators.hpp>
+#include <tmdesc/containers/tuple_operators.hpp>
 
 namespace foo {
 struct test_struct_1 {

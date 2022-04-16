@@ -42,9 +42,11 @@ template <bool... Bools> constexpr bool fast_and_v = fast_and<Bools...>::value;
 template <bool... Bools> struct fast_or : negation<std::is_same<fast_or<Bools...>, fast_or<(Bools, false)...>>> {};
 template <bool... Bools> constexpr bool fast_or_v = fast_or<Bools...>::value;
 
+/// Non-recursive conjunction of `Bs::value...`
 template <class... Bs> struct fast_values_and : fast_and<bool(Bs::value)...> {};
 template <class... Bs> constexpr bool fast_values_and_v = fast_values_and<Bs...>::value;
 
+/// Non-recursive disjunction of `Bs::value...`
 template <class... Bs> struct fast_values_or : fast_or<bool(Bs::value)...> {};
 template <class... Bs> constexpr bool fast_values_or_v = fast_values_or<Bs...>::value;
 

@@ -56,7 +56,7 @@ void print(const T& object_with_description) {
 
         // Using a custom flag if it exists
         auto&& descr = member.flags().find_flag(tmdesc::type_t<additional_description_tag>{});
-        descr.if_some(
+        tmdesc::if_some(descr, 
             [&](auto descr) { std::cout << "description: \"" << descr.c_str() << "\", "; });
 
         std::cout << "value: ";

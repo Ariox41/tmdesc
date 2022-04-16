@@ -4,8 +4,8 @@
 
 #include "struct_declaration.hpp"
 #include <iostream>
-#include <tmdesc/members_view.hpp>
 #include <tmdesc/algorithm/for_each.hpp>
+#include <tmdesc/members_view.hpp>
 
 std::ostream& operator<<(std::ostream& out, tmdesc::string_view str) {
     out.write(str.data(), str.size());
@@ -24,7 +24,7 @@ struct print_visitor {
             constexpr auto name = member_ref.name();
             std::cout << '"' << name;
             constexpr auto info = member_ref.flags().find_flag(tmdesc::type_t<flags::AdditionInfoTag>{});
-            info.if_some([&](auto str) { std::cout << "[" << str << "]"; });
+            tmdesc::if_some(info, [&](auto str) { std::cout << "[" << str << "]"; });
             std::cout << R"(": )";
             (*this)(member_ref.get());
         });

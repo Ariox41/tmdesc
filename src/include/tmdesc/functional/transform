@@ -1,0 +1,16 @@
+#include <type_traits>
+namespace tmdesc {
+namespace detail {
+template <class T, class = void> struct transform_impl;
+} // namespace detail
+
+struct transform_fn {
+    template <class C, class Fn>
+    auto operator()(C&& container, Fn&& fn) const
+        noexcept(noexcept(transform_impl<std::decay_t<C>>::apply(std::decltype<C>(), std::decltype<Fn>())))
+            -> decltype(transform_impl<std::decay_t<C>>::apply(std::decltype<C>(), std::decltype<Fn>())) {
+        return transform_impl<std::decay_t<C>>::apply(static_cast<C&&>(container), static_cast<Fn&&>(fn));
+    }
+};
+constexpr transform_fn transform;
+} // namespace tmdesc

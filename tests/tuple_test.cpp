@@ -4,8 +4,8 @@
 #include <tmdesc/algorithm/for_each.hpp>
 #include <tmdesc/algorithm/transform.hpp>
 #include <tmdesc/string_view.hpp>
-#include <tmdesc/tuple/tuple.hpp>
-#include <tmdesc/tuple/tuple_operators.hpp>
+#include <tmdesc/containers/tuple.hpp>
+#include <tmdesc/containers/tuple_operators.hpp>
 
 static_assert(std::is_trivial<tmdesc::tuple<>>{}, "");
 static_assert(std::is_trivial<tmdesc::tuple<int>>{}, "");

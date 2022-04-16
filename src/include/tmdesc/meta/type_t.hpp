@@ -19,8 +19,10 @@ namespace meta {
 /// type with value-semantic
 template <class T> struct type_t { using type = T; };
 
-/// type list with value-semantic
-template <class... T> struct type_list {};
+template <class T> constexpr type_t<T> type_c{};
+
+// /// type list with value-semantic
+// template <class... T> struct type_list {};
 
 } // namespace meta
 } // namespace tmdesc
