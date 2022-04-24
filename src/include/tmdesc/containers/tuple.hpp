@@ -7,17 +7,19 @@
 
 #pragma once
 
+#include "../concepts/foldable.hpp"
+#include "../concepts/indexable.hpp"
+#include "../functional/invoke.hpp"
 #include "../functional/ref_obj.hpp"
-#include "../get.hpp"
+#include "../meta/logical_operations.hpp"
 #include "detail/tuple.hpp"
-#include <utility>
 
 namespace tmdesc {
 /// full constexpr inherit-based tuple without recursive implementation
-template <class... Ts> struct tuple final : detail::tuple_impl<std::make_index_sequence<sizeof...(Ts)>, Ts...> {
+template <class... Ts> struct tuple final : detail::tuple_storage<std::make_index_sequence<sizeof...(Ts)>, Ts...> {
 private:
-    using super_t           = detail::tuple_impl<std::make_index_sequence<sizeof...(Ts)>, Ts...>;
-    using direct_constuctor = typename super_t::direct_constuctor;
+    using super_t            = detail::tuple_storage<std::make_index_sequence<sizeof...(Ts)>, Ts...>;
+    using direct_constructor = typename super_t::direct_constructor;
     struct conversion_constructor {};
 
 public:
@@ -30,18 +32,18 @@ public:
     /// Direct initialisation constructor
     /// \note The constructor is not explicit
     template <class... Args,
-              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Args) >= 1)>,
-                                                     meta::bool_constant<(sizeof...(Ts) == sizeof...(Args))>,
+              std::enable_if_t<meta::recursive_and_v<bool_constant<(sizeof...(Args) >= 1)>,
+                                                     bool_constant<(sizeof...(Ts) == sizeof...(Args))>,
                                                      meta::fast_values_and<std::is_constructible<Ts, Args&&>...>>,
                                bool> = true>
     constexpr tuple(Args&&... args) noexcept(meta::fast_values_and_v<std::is_nothrow_constructible<Ts, Args&&>...>)
-      : super_t{direct_constuctor{}, static_cast<Args&&>(args)...} {}
+      : super_t{direct_constructor{}, static_cast<Args&&>(args)...} {}
 
     /// Converting copy-constructor
     /// \note The constructor is not explicit
     template <class... Us,
-              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Us) >= 1)>,
-                                                     meta::bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
+              std::enable_if_t<meta::recursive_and_v<bool_constant<(sizeof...(Us) >= 1)>,
+                                                     bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
                                                      meta::negation<std::is_same<tuple<Ts...>, tuple<Us...>>>,
                                                      meta::fast_values_and<std::is_constructible<Ts, const Us&>...>>,
                                bool> = true>
@@ -52,8 +54,8 @@ public:
     /// Converting move-constructor
     /// \note The constructor is not explicit
     template <class... Us,
-              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Us) >= 1)>,
-                                                     meta::bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
+              std::enable_if_t<meta::recursive_and_v<bool_constant<(sizeof...(Us) >= 1)>,
+                                                     bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
                                                      meta::negation<std::is_same<tuple<Ts...>, tuple<Us...>>>,
                                                      meta::fast_values_and<std::is_constructible<Ts, Us&&>...>>,
                                bool> = true>
@@ -62,10 +64,10 @@ public:
 
     // TODO swap
 
-    /// Converting copy-assigment
+    /// Converting copy-assignment
     template <class... Us,
-              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Us) >= 1)>,
-                                                     meta::bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
+              std::enable_if_t<meta::recursive_and_v<bool_constant<(sizeof...(Us) >= 1)>,
+                                                     bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
                                                      meta::negation<std::is_same<tuple<Ts...>, tuple<Us...>>>,
                                                      meta::fast_values_and<std::is_assignable<Ts&, const Us&>...>>,
                                bool> = true>
@@ -75,10 +77,10 @@ public:
         return *this;
     }
 
-    /// Converting move-assigment
+    /// Converting move-assignment
     template <class... Us,
-              std::enable_if_t<meta::recursive_and_v<meta::bool_constant<(sizeof...(Us) >= 1)>,
-                                                     meta::bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
+              std::enable_if_t<meta::recursive_and_v<bool_constant<(sizeof...(Us) >= 1)>,
+                                                     bool_constant<(sizeof...(Ts) == sizeof...(Us))>,
                                                      meta::negation<std::is_same<tuple<Ts...>, tuple<Us...>>>,
                                                      meta::fast_values_and<std::is_assignable<Ts&, Us&&>...>>,
                                bool> = true>
@@ -91,32 +93,67 @@ public:
 private:
     template <class Src, std::size_t... Is>
     constexpr tuple(Src&& src, conversion_constructor, std::index_sequence<Is...>) noexcept(
-        meta::fast_values_and_v<std::is_nothrow_constructible<Ts, tuple_get_result_t<Is, Src>>...>)
-      : tuple(get<Is>(std::forward<Src>(src))...) {}
+        meta::fast_values_and_v<
+            std::is_nothrow_constructible<Ts, decltype(detail::ebo_get<size_constant<Is>>(std::declval<Src>()))>...>)
+      : tuple(detail::ebo_get<size_constant<Is>>(std::forward<Src>(src))...) {}
 
     template <class Src, std::size_t... Is>
     constexpr void assign(Src&& src, std::index_sequence<Is...>) noexcept(
-        meta::fast_values_and_v<std::is_nothrow_assignable<Ts, tuple_get_result_t<Is, Src>>...>) {
-        (void)std::initializer_list<bool>{true,
-                                          ((void)(get<Is>(*this) = get<Is>(std::forward<Src>(src))), void(), true)...};
+        meta::fast_values_and_v<
+            std::is_nothrow_assignable<Ts, decltype(detail::ebo_get<size_constant<Is>>(std::declval<Src>()))>...>) {
+        (void)std::initializer_list<bool>{true, ((void)(detail::ebo_get<size_constant<Is>>(*this) =
+                                                            detail::ebo_get<size_constant<Is>>(std::forward<Src>(src))),
+                                                 void(), true)...};
     }
 };
 
-/// Checks that T is ::tmdesc::tuple
-/// \warning `is_tuple` is not a customisation point
-template <class T> struct is_tuple : std::false_type {};
-template <class... Ts> struct is_tuple<tuple<Ts...>> : std::true_type {};
+/// ===============================
+///            Indexable
+/// ===============================
 
-/// @ref is_tuple helper
-template <class T> constexpr bool is_tuple_v = is_tuple<T>::value;
+/// `at` implementation for tuple
+template <class... Ts> struct at_impl<tuple<Ts...>> {
+    /// v = [v0, v1, ..., vN] => v [index]
+    template <std::size_t I, class V> static constexpr decltype(auto) apply(size_constant<I>, V&& v) noexcept {
+        return detail::ebo_get<size_constant<I>>(std::forward<V>(v));
+    }
+};
 
-/// Specialisation for @ref tuple
-template <class... Ts>
-struct tuple_size<tuple<Ts...>, std::enable_if_t<true>> : public std::integral_constant<std::size_t, sizeof...(Ts)> {};
+/// `size` implementation for tuple
+template <class... Ts> struct size_impl<tuple<Ts...>> {
+    /// v = [v0, v1, ..., vN] => size_c<N + 1>
+    template <class V> static constexpr auto apply(V&&) noexcept { return sizeof...(Ts); }
+};
+
+/// ===============================
+///             Foldable
+/// ===============================
+
+/// `unpack` implementation for tuple
+template <class... Ts> struct unpack_impl<tuple<Ts...>> {
+    template <class V, class Fn, std::size_t... I>
+    static constexpr auto apply_impl(V&& v, Fn&& fn, index_sequence<I...>) noexcept(
+        noexcept(invoke(std::declval<Fn>(), detail::ebo_get<size_constant<I>>(std::declval<V>())...)))
+        -> decltype(invoke(std::declval<Fn>(), detail::ebo_get<size_constant<I>>(std::declval<V>())...)) {
+        return invoke(std::forward<Fn>(fn), detail::ebo_get<size_constant<I>>(std::forward<V>(v))...);
+    }
+
+    /// v = [v1, v2, ..., vN] => fn(v1, v2, ..., vN)
+    template <class V, class Fn>
+    static constexpr auto apply(V&& v, Fn&& fn) noexcept( //
+        noexcept(apply_impl(std::declval<V>(), std::declval<Fn>(), make_index_sequence<sizeof...(Ts)>{})))
+        -> decltype(apply_impl(std::declval<V>(), std::declval<Fn>(), make_index_sequence<sizeof...(Ts)>{})) {
+        return apply_impl(std::forward<V>(v), std::forward<Fn>(fn), make_index_sequence<sizeof...(Ts)>{});
+    }
+};
+
+/// ===============================
+///               Make
+/// ===============================
 
 /// @see std::make_tuple
 #ifdef TMDESC_DOXYGEN
-constexpr auto make_tuple = [](auto&&... args) -> tuple<unwrap_ref_decay_t<decltype(args)>...> {
+constexpr auto make_tuple = [](auto&&... args) -> tuple<try_unwrap_ref_obj_type_t<decltype(args)>...> {
     return {std::forward<decltype(args)>(args)...};
 };
 #else
@@ -155,9 +192,4 @@ struct forward_as_tuple_t {
 constexpr forward_as_tuple_t forward_as_tuple{};
 #endif
 
-/// Specialization for @ref tuple
-template <class... Ts> struct tuple_getter<tuple<Ts...>> { using type = detail::getter_by_id_for_tuple_t; };
-
-/// Specialization for @ref tuple
-template <class... Ts> struct tuple_getter_by_type<tuple<Ts...>> { using type = detail::getter_by_type_for_tuple_t; };
 } // namespace tmdesc
