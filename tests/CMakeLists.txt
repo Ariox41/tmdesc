@@ -7,11 +7,7 @@ endif()
 set(TESTS_SRC
   main.cpp
   string_view_test.cpp
-  tuple_test.cpp
-  struct_algorithm.cpp
   struct_tie_test.cpp
-  functional/ref_obj_test.cpp
-  functional/invoke_test.cpp
 )
 
 add_executable(all_tests ${TESTS_SRC})
