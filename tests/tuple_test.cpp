@@ -1,11 +1,9 @@
 #include <doctest/doctest.h>
 
 #include <string>
-#include <tmdesc/algorithm/for_each.hpp>
-#include <tmdesc/algorithm/transform.hpp>
 #include <tmdesc/string_view.hpp>
 #include <tmdesc/containers/tuple.hpp>
-#include <tmdesc/containers/tuple_operators.hpp>
+#include "test_helpers.hpp"
 
 static_assert(std::is_trivial<tmdesc::tuple<>>{}, "");
 static_assert(std::is_trivial<tmdesc::tuple<int>>{}, "");
@@ -69,9 +67,9 @@ struct throw_visitor {
 
 //static_assert (!noexcept (tmdesc::repeat_n<4>(throw_visitor{})), "");
 
-static_assert(noexcept(tmdesc::for_each(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
+// static_assert(noexcept(tmdesc::for_each(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
 
-static_assert(noexcept(tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
+// static_assert(noexcept(tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
 
 // ?? msvc sometimes considers a function as `noexcept(true)`
 // ?? if `noexcept(false)` is in its description, but `throw` is not called in its implementation.
@@ -80,14 +78,9 @@ static_assert(noexcept(tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(
 
 // implementation test
 
-#define STATIC_CHECK(...)           \
-    static_assert(__VA_ARGS__, ""); \
-    CHECK(__VA_ARGS__)
 
-#define STATIC_NOTHROW_CHECK(...)             \
-    static_assert(__VA_ARGS__, "");           \
-    static_assert(noexcept(__VA_ARGS__), ""); \
-    CHECK(__VA_ARGS__)
+
+
 
 TEST_CASE("tuple initialisation and get") {
     SUBCASE("empty tuple constuctors and assigment") {
@@ -111,19 +104,19 @@ TEST_CASE("tuple initialisation and get") {
         (void)move_assigned;
 
         SUBCASE("set and get") {
-            tmdesc::get<0>(assigned) = 24;
-            REQUIRE(tmdesc::get<0>(assigned) == 24);
-            REQUIRE(tmdesc::get<0>(t) == 42);
+            tmdesc::at_c<0>(assigned) = 24;
+            REQUIRE(tmdesc::at_c<0>(assigned) == 24);
+            REQUIRE(tmdesc::at_c<0>(t) == 42);
         }
         SUBCASE("to tuple of reference") {
             tmdesc::tuple<const int&> lvalue_ref_tuple = move_assigned;
             tmdesc::tuple<int&&> rvalue_ref_tuple = std::move(move_assigned);
 
-            REQUIRE(tmdesc::get<0>(lvalue_ref_tuple) == 42);
-            REQUIRE(tmdesc::get<0>(rvalue_ref_tuple) == 42);
-            tmdesc::get<0>(move_assigned) = 11;
-            REQUIRE(tmdesc::get<0>(lvalue_ref_tuple) == 11);
-            REQUIRE(tmdesc::get<0>(rvalue_ref_tuple) == 11);
+            REQUIRE(tmdesc::at_c<0>(lvalue_ref_tuple) == 42);
+            REQUIRE(tmdesc::at_c<0>(rvalue_ref_tuple) == 42);
+            tmdesc::at_c<0>(move_assigned) = 11;
+            REQUIRE(tmdesc::at_c<0>(lvalue_ref_tuple) == 11);
+            REQUIRE(tmdesc::at_c<0>(rvalue_ref_tuple) == 11);
         }
     }
     SUBCASE("multiple element tuple creation") {
@@ -133,104 +126,104 @@ TEST_CASE("tuple initialisation and get") {
         assigned = clone;
 
         SUBCASE("set and get") {
-            tmdesc::get<0>(assigned) = 42;
-            tmdesc::get<1>(assigned) = '3';
-            REQUIRE(tmdesc::get<0>(assigned) == 42);
-            REQUIRE(tmdesc::get<1>(assigned) == '3');
+            tmdesc::at_c<0>(assigned) = 42;
+            tmdesc::at_c<1>(assigned) = '3';
+            REQUIRE(tmdesc::at_c<0>(assigned) == 42);
+            REQUIRE(tmdesc::at_c<1>(assigned) == '3');
         }
     }
     SUBCASE("make_tuple") {
         static constexpr tmdesc::zstring_view str = "30";
         static constexpr auto t1                  = tmdesc::make_tuple(str, 30, 42, 80);
         static constexpr auto t2                  = t1;
-        STATIC_NOTHROW_CHECK(tmdesc::get<0>(t2) == str);
-        STATIC_NOTHROW_CHECK(tmdesc::get<1>(t2) == 30);
-        STATIC_NOTHROW_CHECK(tmdesc::get<2>(t2) == 42);
-        STATIC_NOTHROW_CHECK(tmdesc::get<3>(t2) == 80);
+        STATIC_NOTHROW_CHECK(tmdesc::at_c<0>(t2) == str);
+        STATIC_NOTHROW_CHECK(tmdesc::at_c<1>(t2) == 30);
+        STATIC_NOTHROW_CHECK(tmdesc::at_c<2>(t2) == 42);
+        STATIC_NOTHROW_CHECK(tmdesc::at_c<3>(t2) == 80);
     }
 }
 
-TEST_CASE("tuple operations") {
-    SUBCASE("empty tuple") {
-        constexpr tmdesc::tuple<> t1;
-        constexpr tmdesc::tuple<> t2;
-        STATIC_NOTHROW_CHECK(t1 == t2);
-        STATIC_NOTHROW_CHECK(!(t1 != t2));
-        STATIC_NOTHROW_CHECK(!(t1 < t2));
-        STATIC_NOTHROW_CHECK(!(t1 > t2));
-        STATIC_NOTHROW_CHECK(t1 >= t2);
-        STATIC_NOTHROW_CHECK(t1 <= t2);
-    }
-    SUBCASE("single same value tuple") {
-        constexpr tmdesc::tuple<char> t1(char(42));
-        constexpr tmdesc::tuple<int> t2(42);
-        STATIC_NOTHROW_CHECK(t1 == t2);
-        STATIC_NOTHROW_CHECK(!(t1 != t2));
-        STATIC_NOTHROW_CHECK(!(t1 < t2));
-        STATIC_NOTHROW_CHECK(!(t1 > t2));
-        STATIC_NOTHROW_CHECK(t1 >= t2);
-        STATIC_NOTHROW_CHECK(t1 <= t2);
-    }
-    SUBCASE("single different value tuple") {
-        constexpr tmdesc::tuple<int> t1(1);
-        constexpr tmdesc::tuple<char> t2(char(42));
-        STATIC_NOTHROW_CHECK(!(t1 == t2));
-        STATIC_NOTHROW_CHECK(t1 != t2);
-        STATIC_NOTHROW_CHECK(t1 < t2);
-        STATIC_NOTHROW_CHECK(!(t1 > t2));
-        STATIC_NOTHROW_CHECK(!(t1 >= t2));
-        STATIC_NOTHROW_CHECK(t1 <= t2);
-    }
-    SUBCASE("multiple same value tuple") {
-        constexpr tmdesc::tuple<int, char, int> t1(int(1), char(-42), 3);
-        constexpr tmdesc::tuple<char, int, int> t2(char(1), -42, 3);
+//TEST_CASE("tuple operations") {
+//    SUBCASE("empty tuple") {
+//        constexpr tmdesc::tuple<> t1;
+//        constexpr tmdesc::tuple<> t2;
+//        STATIC_NOTHROW_CHECK(t1 == t2);
+//        STATIC_NOTHROW_CHECK(!(t1 != t2));
+//        STATIC_NOTHROW_CHECK(!(t1 < t2));
+//        STATIC_NOTHROW_CHECK(!(t1 > t2));
+//        STATIC_NOTHROW_CHECK(t1 >= t2);
+//        STATIC_NOTHROW_CHECK(t1 <= t2);
+//    }
+//    SUBCASE("single same value tuple") {
+//        constexpr tmdesc::tuple<char> t1(char(42));
+//        constexpr tmdesc::tuple<int> t2(42);
+//        STATIC_NOTHROW_CHECK(t1 == t2);
+//        STATIC_NOTHROW_CHECK(!(t1 != t2));
+//        STATIC_NOTHROW_CHECK(!(t1 < t2));
+//        STATIC_NOTHROW_CHECK(!(t1 > t2));
+//        STATIC_NOTHROW_CHECK(t1 >= t2);
+//        STATIC_NOTHROW_CHECK(t1 <= t2);
+//    }
+//    SUBCASE("single different value tuple") {
+//        constexpr tmdesc::tuple<int> t1(1);
+//        constexpr tmdesc::tuple<char> t2(char(42));
+//        STATIC_NOTHROW_CHECK(!(t1 == t2));
+//        STATIC_NOTHROW_CHECK(t1 != t2);
+//        STATIC_NOTHROW_CHECK(t1 < t2);
+//        STATIC_NOTHROW_CHECK(!(t1 > t2));
+//        STATIC_NOTHROW_CHECK(!(t1 >= t2));
+//        STATIC_NOTHROW_CHECK(t1 <= t2);
+//    }
+//    SUBCASE("multiple same value tuple") {
+//        constexpr tmdesc::tuple<int, char, int> t1(int(1), char(-42), 3);
+//        constexpr tmdesc::tuple<char, int, int> t2(char(1), -42, 3);
 
-        STATIC_NOTHROW_CHECK(t1 == t2);
-        STATIC_NOTHROW_CHECK(!(t1 != t2));
-        STATIC_NOTHROW_CHECK(!(t1 < t2));
-        STATIC_NOTHROW_CHECK(!(t1 > t2));
-        STATIC_NOTHROW_CHECK(t1 >= t2);
-        STATIC_NOTHROW_CHECK(t1 <= t2);
-    }
+//        STATIC_NOTHROW_CHECK(t1 == t2);
+//        STATIC_NOTHROW_CHECK(!(t1 != t2));
+//        STATIC_NOTHROW_CHECK(!(t1 < t2));
+//        STATIC_NOTHROW_CHECK(!(t1 > t2));
+//        STATIC_NOTHROW_CHECK(t1 >= t2);
+//        STATIC_NOTHROW_CHECK(t1 <= t2);
+//    }
 
-    SUBCASE("multiple different value tuple") {
-        constexpr tmdesc::tuple<int, char, int> t1(1, char(-42), 3);
-        constexpr tmdesc::tuple<char, int, int> t2(char(1), 42, 3);
-        STATIC_NOTHROW_CHECK(!(t1 == t2));
-        STATIC_NOTHROW_CHECK(t1 != t2);
-        STATIC_NOTHROW_CHECK(t1 < t2);
-        STATIC_NOTHROW_CHECK(!(t1 > t2));
-        STATIC_NOTHROW_CHECK(!(t1 >= t2));
-        STATIC_NOTHROW_CHECK(t1 <= t2);
-    }
-}
+//    SUBCASE("multiple different value tuple") {
+//        constexpr tmdesc::tuple<int, char, int> t1(1, char(-42), 3);
+//        constexpr tmdesc::tuple<char, int, int> t2(char(1), 42, 3);
+//        STATIC_NOTHROW_CHECK(!(t1 == t2));
+//        STATIC_NOTHROW_CHECK(t1 != t2);
+//        STATIC_NOTHROW_CHECK(t1 < t2);
+//        STATIC_NOTHROW_CHECK(!(t1 > t2));
+//        STATIC_NOTHROW_CHECK(!(t1 >= t2));
+//        STATIC_NOTHROW_CHECK(t1 <= t2);
+//    }
+//}
 
-struct accumulator {
-    int& res;
-    template <class T> constexpr void operator()(const T& v) const noexcept { res += int(v); }
-};
+//struct accumulator {
+//    int& res;
+//    template <class T> constexpr void operator()(const T& v) const noexcept { res += int(v); }
+//};
 
-template <class T>
-constexpr int
-accumulate(const T& tuple) noexcept(noexcept(tmdesc::for_each(tuple, accumulator{std::declval<int&>()}))) {
-    int res = 0;
-    tmdesc::for_each(tuple, accumulator{res});
-    return res;
-}
+//template <class T>
+//constexpr int
+//accumulate(const T& tuple) noexcept(noexcept(tmdesc::for_each(tuple, accumulator{std::declval<int&>()}))) {
+//    int res = 0;
+//    tmdesc::for_each(tuple, accumulator{res});
+//    return res;
+//}
 
-TEST_CASE("tuple_foreach") {
-    constexpr auto tuple = tmdesc::make_tuple(1, '2', 42);
-    constexpr auto sum   = (1 + int('2') + 42);
-    STATIC_NOTHROW_CHECK(accumulate(tuple) == sum);
-}
-struct increment_fn {
-    template <class T> constexpr auto operator()(const T& v) const noexcept { return v + T(1); }
-};
+//TEST_CASE("tuple_foreach") {
+//    constexpr auto tuple = tmdesc::make_tuple(1, '2', 42);
+//    constexpr auto sum   = (1 + int('2') + 42);
+//    STATIC_NOTHROW_CHECK(accumulate(tuple) == sum);
+//}
+//struct increment_fn {
+//    template <class T> constexpr auto operator()(const T& v) const noexcept { return v + T(1); }
+//};
 
-TEST_CASE("transform_t<tuple>_to") {
-    constexpr auto tuple = tmdesc::make_tuple(1, '2', 42);
-    constexpr auto r     = tmdesc::transform_to<tmdesc::tuple>(tuple, increment_fn{});
-    STATIC_NOTHROW_CHECK(tmdesc::get<0>(r) == 2);
-    STATIC_NOTHROW_CHECK(tmdesc::get<1>(r) == '3');
-    STATIC_NOTHROW_CHECK(tmdesc::get<2>(r) == 43);
-}
+//TEST_CASE("transform_t<tuple>_to") {
+//    constexpr auto tuple = tmdesc::make_tuple(1, '2', 42);
+//    constexpr auto r     = tmdesc::transform_to<tmdesc::tuple>(tuple, increment_fn{});
+//    STATIC_NOTHROW_CHECK(tmdesc::at_c<0>(r) == 2);
+//    STATIC_NOTHROW_CHECK(tmdesc::at_c<1>(r) == '3');
+//    STATIC_NOTHROW_CHECK(tmdesc::at_c<2>(r) == 43);
+//}

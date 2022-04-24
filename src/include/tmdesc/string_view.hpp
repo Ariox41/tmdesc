@@ -6,8 +6,6 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-
-#include <cstdint>
 #include <string>
 
 namespace tmdesc {
@@ -21,8 +19,8 @@ constexpr bool operator!=(string_view lha, string_view rha) noexcept;
 /// The interface is based on c++17 std::string_view and boost::string_view
 /// \see class zstring_view
 class string_view {
-    const char* m_str;
-    std::size_t m_size;
+    const char* data_;
+    std::size_t size_;
 
 public:
     static constexpr std::size_t npos = std::string::npos;
@@ -51,8 +49,8 @@ public:
     /// size() == size
     /// data() == str
     constexpr string_view(const char* str, const std::size_t size) noexcept
-      : m_str(str)
-      , m_size(size) {}
+      : data_(str)
+      , size_(size) {}
 
     /// Construct from null-terminated string.
     /// \post
@@ -80,12 +78,12 @@ public:
       : string_view(str.data(), str.size()) {}
 
     constexpr string_view(const string_view&) noexcept = default;
-    constexpr string_view(string_view&&) noexcept = default;
+    constexpr string_view(string_view&&) noexcept      = default;
     constexpr string_view& operator=(const string_view&) noexcept = default;
     constexpr string_view& operator=(string_view&&) noexcept = default;
 
-    constexpr const char* data() const noexcept { return m_str; }
-    constexpr std::size_t size() const noexcept { return m_size; }
+    constexpr const char* data() const noexcept { return data_; }
+    constexpr std::size_t size() const noexcept { return size_; }
     constexpr bool empty() const noexcept { return size() == 0; }
 
     constexpr const char* cbegin() const noexcept { return data(); }
@@ -98,34 +96,51 @@ public:
     constexpr char front() const noexcept { return (*this)[0]; }
     constexpr char back() const noexcept { return (*this)[size() - 1]; }
 
-    /// Remove prefix with size of min(n, this->size())
-    constexpr string_view remove_prefix(std::size_t n) const noexcept {
-        std::size_t realN = n > size() ? size() : n;
-        return string_view{data() + realN, size() - realN};
-    }
-
-    /// Remove suffix with size of min(n, this->size())
-    constexpr string_view remove_suffix(std::size_t n) const noexcept {
-        std::size_t realN = n > size() ? size() : n;
-        return string_view{begin(), size() - realN};
-    }
-    /// return substring {pos, pos + count}
+    /// \return substring {pos, pos + count}
     /// \note noexcept, unlike std::string_view.
     /// if(pos > size()) pos = size();
     /// if((pos + count) > size()) count = size() - pos;
     constexpr string_view substr(std::size_t pos, std::size_t count = npos) const noexcept {
-        if (pos > size())
-            pos = size();
-        if ((pos + count) > size())
-            count = size() - pos;
-        return string_view(data() + pos, count);
+        if (pos > size_)
+            pos = size_;
+        if (pos + count > size_)
+            count = size_ - pos;
+        return string_view(data_ + pos, count);
     }
+
+    /// \return prefix with size of min(n, this->size())
+    constexpr string_view prefix(std::size_t n) const noexcept {
+        if (n > size_)
+            n = size_;
+        return string_view{data_, n};
+    }
+
+    /// \return suffix with size of min(n, this->size())
+    constexpr string_view suffix(std::size_t n) const noexcept {
+        if (n > size_)
+            n = size_;
+        return string_view{data_ + size_ - n, n};
+    }
+
+    /// Remove prefix with size of min(n, this->size())
+    constexpr void remove_prefix(std::size_t n) noexcept {
+        if (n > size_)
+            n = size_;
+        data_ += n;
+        size_ -= n;
+    }
+
+    /// Remove suffix with size of min(n, this->size())
+    constexpr void remove_suffix(std::size_t n) noexcept {
+        if (n > size_)
+            n = size_;
+        size_ -= n;
+    }
+
     constexpr bool starts_with(char ch) const noexcept { return size() > 0 && front() == ch; }
-    constexpr bool starts_with(string_view s) const noexcept { return substr(0, s.size()) == s; }
+    constexpr bool starts_with(string_view s) const noexcept { return prefix(s.size()) == s; }
     constexpr bool ends_with(char ch) const noexcept { return size() > 0 && back() == ch; }
-    constexpr bool ends_with(string_view s) const noexcept {
-        return substr(size() - s.size(), s.size()) == s;
-    }
+    constexpr bool ends_with(string_view s) const noexcept { return suffix(s.size()) == s; }
 
     constexpr std::size_t find_first_of(char ch) const noexcept {
         for (std::size_t i = 0; i < size(); ++i) {
@@ -158,6 +173,10 @@ public:
     /// \note not compatible with std::string_view, but compatible with boost::string_view
     std::string to_string() const { return std::string(data(), size()); }
 
+    template <class T> constexpr T into() const noexcept(noexcept(T{std::declval<const char*>(), size_t{}})) {
+        return T{data(), size()};
+    }
+
 private:
     static constexpr std::size_t cstringsize(const char* str) noexcept {
         std::size_t size = 0;
@@ -169,11 +188,10 @@ private:
 };
 
 /// Null-terminated string_view.
-/// Constucts from const char* and std::string only, default constuctor equals zstring_view("").
+/// Constucts from const char* and std::string only, default constructor equals zstring_view("").
 class zstring_view : public string_view {
-
 public:
-    /// Default constuctor equals to zstring_view("")
+    /// Default constructor equals to zstring_view("")
     /// \post
     /// size() == 0
     /// *data() == '\0'
@@ -183,6 +201,8 @@ public:
 
     /// Construct from null-terminated string.
     /// \post
+    /// data() == cstr
+    /// c_str() == cstr
     /// size() == (cstr == nullptr? std::strlen(cstr): 0)
     /// \note implicit constructor, like std::string_view
     constexpr zstring_view(const char* cstr) noexcept
@@ -190,13 +210,15 @@ public:
 
     /// Construct from std::string
     /// \post
+    /// data() == src.c_str()
     /// size() == src.size()
     /// c_str() == src.c_str()
-    /// data() == src.c_str()
     /// (*this)[size()] == '\0'
-    template <class... Ts>
-    zstring_view(const std::basic_string<char, Ts...>& src) noexcept
+    zstring_view(const std::string& src) noexcept
       : string_view(src.c_str(), src.size()) {}
+
+    zstring_view(nullptr_t)   = delete;
+    zstring_view(string_view) = delete;
 
     constexpr const char* c_str() const noexcept { return data(); }
 };
@@ -213,17 +235,9 @@ constexpr bool operator==(string_view lha, string_view rha) noexcept {
 }
 constexpr bool operator!=(string_view lha, string_view rha) noexcept { return !(lha == rha); }
 
-constexpr bool operator<(string_view lha, string_view rha) noexcept {
-    return lha.compare(rha) == -1;
-}
-constexpr bool operator<=(string_view lha, string_view rha) noexcept {
-    return lha.compare(rha) != 1;
-}
-constexpr bool operator>(string_view lha, string_view rha) noexcept {
-    return lha.compare(rha) == 1;
-}
-constexpr bool operator>=(string_view lha, string_view rha) noexcept {
-    return lha.compare(rha) != -1;
-}
+constexpr bool operator<(string_view lha, string_view rha) noexcept { return lha.compare(rha) == -1; }
+constexpr bool operator<=(string_view lha, string_view rha) noexcept { return lha.compare(rha) != 1; }
+constexpr bool operator>(string_view lha, string_view rha) noexcept { return lha.compare(rha) == 1; }
+constexpr bool operator>=(string_view lha, string_view rha) noexcept { return lha.compare(rha) != -1; }
 
 } // namespace tmdesc

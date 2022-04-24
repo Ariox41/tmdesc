@@ -23,3 +23,5 @@ target_compile_options(all_tests PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W3>
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra >
 )
+
+add_test(NAME tmdesc COMMAND all_tests)
