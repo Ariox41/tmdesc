@@ -7,9 +7,7 @@
 
 #pragma once
 
-#include "../concepts/foldable.hpp"
-#include "../concepts/indexable.hpp"
-#include "../functional/invoke.hpp"
+#include "../concepts/finite_indexable.hpp"
 #include "../functional/ref_obj.hpp"
 #include "../meta/logical_operations.hpp"
 #include "detail/ebo.hpp"
@@ -112,25 +110,6 @@ template <class T1, class T2> struct at_impl<pair<T1, T2>> {
 template <class T1, class T2> struct size_impl<pair<T1, T2>> {
     /// v = [v0, v1, ..., vN] => size_c<N + 1>
     template <class V> static constexpr auto apply(V&& v) noexcept { return size_c<2>; }
-};
-
-/// ===============================
-///             Foldable
-/// ===============================
-
-/// `unpack` implementation for pair
-template <class T1, class T2> struct unpack_impl<pair<T1, T2>> {
-
-    /// v = [v1, v2, ..., vN] => fn(v1, v2, ..., vN)
-    template <class V, class Fn>
-    static constexpr auto apply(V&& v, Fn&& fn) noexcept( //
-        noexcept(invoke(std::declval<Fn>(), detail::ebo_get<size_constant<0>>(std::declval<V>()),
-                        detail::ebo_get<size_constant<1>>(std::declval<V>()))))
-        -> decltype(invoke(std::declval<Fn>(), detail::ebo_get<size_constant<0>>(std::declval<V>()),
-                           detail::ebo_get<size_constant<1>>(std::declval<V>()))) {
-        return invoke(std::forward<Fn>(fn), detail::ebo_get<size_constant<0>>(std::forward<V>(v)),
-                      detail::ebo_get<size_constant<1>>(std::forward<V>(v)));
-    }
 };
 
 /// ===============================

@@ -6,7 +6,7 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "../../meta/integral_constant.hpp"
+#include "../../core/integral_constant.hpp"
 #include "../../meta/logical_operations.hpp"
 #include "ebo.hpp"
 namespace tmdesc {

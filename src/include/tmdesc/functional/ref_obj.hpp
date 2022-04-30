@@ -70,7 +70,7 @@ struct pointer_to_ref_fn {
     }
 };
 
-/// Functional object for explicit pointer-like object dereference to `ref_obj`
+/// Functional object for explicit dereference pointer-like object  to `ref_obj`
 /// @note `ref_obj<Pointer>` is converted to `ref_obj<deref<Pointer>>`
 /// @note Conversion can generate a dangling link if used carelessly
 constexpr pointer_to_ref_fn pointer_to_ref{};

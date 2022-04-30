@@ -4,19 +4,20 @@
 //
 // The documentation can be found at the library's page:
 // https://github.com/Ariox41/tmdesc
+
 #pragma once
-#include "../meta/implementable_function.hpp"
+#include "../core/implementable_function.hpp"
 
 namespace tmdesc {
 
 /// `unpack` implementation interface for foldable type
-template <class T, class Enable = void> struct unpack_impl : meta::unimplemented {
+template <class T, class Enable = void> struct unpack_impl : core::unimplemented {
     /// v = [v1, v2, ..., vN] => fn(v1, v2, ..., vN)
-    template <class V, class Fn> static constexpr auto apply(V&& v, Fn&& fn);
+    template <class V, class Fn> static constexpr auto apply(V&& v, Fn&& fn) = delete;
 };
 /// Foldable types must implement the `unpack_impl`.
 /// \todo Are there any cases when it is easier to define `fold_left` and use it to implement `unpack`?
-template <class T> struct is_foldable : meta::has_implementation<unpack_impl<T>> {};
+template <class T> struct is_foldable : core::has_implementation<unpack_impl<T>> {};
 
 struct unpack_t {
     template <class T> using impl_t = unpack_impl<std::decay_t<T>>;

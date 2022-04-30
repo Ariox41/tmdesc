@@ -9,8 +9,7 @@
 #include "integral_constant.hpp"
 #include "void_t.hpp"
 namespace tmdesc {
-namespace meta {
-
+namespace core {
 /// Base class for marking type as unimplemented function
 struct unimplemented {};
 
@@ -26,8 +25,8 @@ struct has_implementation<T, void_t<decltype(static_cast<const unimplemented&>(s
 template <class T, class = void> struct is_default_implementation : false_type {};
 
 template <class T>
-struct has_implementation<T, void_t<decltype(static_cast<const default_implementation&>(std::declval<const T&>()))>>
+struct is_default_implementation<T,
+                                 void_t<decltype(static_cast<const default_implementation&>(std::declval<const T&>()))>>
   : true_type {};
-
-} // namespace meta
+} // namespace core
 } // namespace tmdesc

@@ -6,9 +6,8 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "integral_constant.hpp"
+#include "../core/integral_constant.hpp"
 #include <initializer_list>
-#include <type_traits>
 
 namespace tmdesc {
 namespace meta {

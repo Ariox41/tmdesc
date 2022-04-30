@@ -5,19 +5,18 @@
 // The documentation can be found at the library's page:
 // https://github.com/Ariox41/tmdesc
 #pragma once
+#include "../concepts/foldable.hpp"
+#include "../functional/invoke.hpp"
 #include <type_traits>
 namespace tmdesc {
 
-/**
-    Similar to std::optional, tmdesc::optional represents a value of some type or a non-existent value.
-
-    Unlike std::optional, the optional-ness is known at compile time.
-
-    @see some
-    @see none
-    @see is_some
-    @see is_none
-*/
+/// Similar to std::optional, tmdesc::optional represents a value of some type or a non-existent value.
+/// Unlike std::optional, the optional-ness is known at compile time.
+/// @see some
+/// @see none
+/// @see is_some
+/// @see is_none
+/// @see eval_if
 template <class... T> struct optional;
 
 template <class T> struct optional<T> {
@@ -39,6 +38,19 @@ template <class T> struct optional<T> {
 private:
     T value_;
 };
+// TODO do we need it?
+template <class T> struct optional<T&> {
+    constexpr optional(T& ref)
+      : ref_(ref) {}
+    constexpr optional(const optional&) = default;
+    constexpr optional& operator=(const optional&) = default;
+
+    constexpr T& value() const { return ref_; }
+
+private:
+    T& ref_;
+};
+
 template <> struct optional<> {
     constexpr optional()                = default;
     constexpr optional(optional&&)      = default;
@@ -47,15 +59,24 @@ template <> struct optional<> {
     constexpr optional& operator=(const optional&) = default;
 
     // optional<>  does not contain a value
-    const auto value() const = delete;
+    constexpr auto value() const = delete;
 };
 
-constexpr optional<> none{};
+template <class T> using some_t = optional<T>;
+using none_t                    = optional<>;
 
 template <class T>
-optional<std::decay_t<T>> some(T&& v) noexcept(std::is_nothrow_constructible<std::decay_t<T>, T&&>::value) {
-    return optional<std::decay_t<T>>{static_cast<T&&>(v)};
+some_t<std::decay_t<T>> some(T&& v) noexcept(std::is_nothrow_constructible<std::decay_t<T>, T&&>::value) {
+    return some_t<std::decay_t<T>>{static_cast<T&&>(v)};
 }
+
+constexpr none_t none{};
+
+template <class T> constexpr true_type is_some(const some_t<T>&) noexcept { return {}; }
+constexpr false_type is_some(none_t) noexcept { return {}; }
+
+template <class T> constexpr false_type is_none(const some_t<T>&) noexcept { return {}; }
+constexpr true_type is_none(none_t) noexcept { return {}; }
 
 template <class T, class U>
 constexpr auto operator==(const optional<T>& lha, const optional<U>& rha) noexcept(noexcept(std::declval<const T&>() ==
@@ -67,37 +88,20 @@ template <class T> constexpr bool operator==(const optional<T>&, const optional<
 template <class T> constexpr bool operator==(const optional<>&, const optional<T>&) noexcept { return false; }
 constexpr bool operator==(const optional<>&, const optional<>&) noexcept { return true; }
 
-template <class T> using some_t = optional<T>;
-using none_t                    = optional<>;
+/// =======================
+///         Foldable
+/// =======================
 
-template <class T> struct is_optional : std::false_type {};
-template <class T> struct is_optional<optional<T>> : std::true_type {};
-template <> struct is_optional<optional<>> : std::true_type {};
-
-template <class T> struct is_some : std::false_type {};
-
-template <class T> struct is_some<some_t<T>> : std::true_type {};
-
-template <class T, class Fn, class Ret = decltype(std::declval<Fn>()())>
-constexpr const T& get_some_or_eval(const optional<T>& opt, Fn&&) noexcept {
-    static_assert(std::is_convertible<Ret, T>::value, "");
-    return opt.value();
-}
-template <class T, class Fn, class Ret = decltype(std::declval<Fn>()())>
-constexpr T& get_some_or_eval(optional<T>& opt, Fn&&) noexcept {
-    static_assert(std::is_convertible<Ret, T>::value, "");
-    return opt.value();
-}
-template <class T, class Fn, class Ret = decltype(std::declval<Fn>()())>
-constexpr T&& get_some_or_eval(optional<T>&& opt, Fn&&) noexcept {
-    static_assert(std::is_convertible<Ret, T>::value, "");
-    return std::move(opt).value();
-}
-
-template <class Opt, class Fn, std::enable_if_t<is_some<std::decay_t<Opt>>::value, bool> = true>
-constexpr auto if_some(Opt&& opt, Fn&& fn) noexcept {
-    return invoke(std::forward<Fn>(fn), std::forward<Opt>(opt).value());
-}
-template <class Fn> constexpr void if_some(none_t, Fn&&) noexcept {}
+/// `unpack` implementation for optional
+template <class T> struct unpack_impl<some_t<T>> {
+    /// v = [v1, v2, ..., vN] => fn(v1, v2, ..., vN)
+    template <class V, class Fn>
+    static constexpr auto apply(V&& v,
+                                Fn&& fn) //
+        noexcept(noexcept(invoke(std::declval<Fn>(), std::declval<V>().value())))
+            -> decltype(invoke(std::declval<Fn>(), std::declval<V>().value())) {
+        return invoke(std::forward<Fn>(fn), std::forward<V>(v).value());
+    }
+};
 
 } // namespace tmdesc

@@ -5,19 +5,19 @@
 // The documentation can be found at the library's page:
 // https://github.com/Ariox41/tmdesc
 #pragma once
-#include "../meta/implementable_function.hpp"
-#include "optional.hpp"
+#include "../containers/optional.hpp"
+#include "../core/implementable_function.hpp"
 
 namespace tmdesc {
 
 /// `find_if` implementation for searchable type
-template <class T, class Enable = void> struct find_if_impl : meta::unimplemented {
+template <class T, class Enable = void> struct find_if_impl : core::unimplemented {
     /// Finds a value whose key satisfies the predicate and returns some(value) or none
-    template <class C, class P> static constexpr auto apply(C&& container, P&& predicate);
+    template <class C, class P> static constexpr auto apply(C&& container, P&& predicate) = delete;
 };
 
 /// Searchable types must implement the `find_if_impl`.
-template <class T> struct is_searchable : meta::has_implementation<find_if_impl<T>> {};
+template <class T> struct is_searchable : core::has_implementation<find_if_impl<T>> {};
 
 struct find_if_t {
     template <class T> using impl_t = find_if_impl<std::decay_t<T>>;

@@ -6,8 +6,9 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include <type_traits>
-#include <utility>
+
+#include <type_traits> //< for integral_constant
+#include <utility>     //< for integer_sequence
 
 namespace tmdesc {
 
@@ -20,10 +21,14 @@ using std::integer_sequence;
 
 template <bool B> using bool_constant = std::integral_constant<bool, B>;
 template <bool B> constexpr bool_constant<B> bool_c{};
+constexpr bool_constant<true> true_c{};
+constexpr bool_constant<false> false_c{};
 
 template <std::size_t I> using size_constant = std::integral_constant<std::size_t, I>;
 template <std::size_t I> constexpr size_constant<I> size_c{};
 
-template <std::size_t I> constexpr std::make_index_sequence<I> index_sequence_up_to(size_constant<I>) noexcept { return {}; }
+template <std::size_t I> constexpr std::make_index_sequence<I> index_sequence_up_to(size_constant<I>) noexcept {
+    return {};
+}
 
 } // namespace tmdesc

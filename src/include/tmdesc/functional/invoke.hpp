@@ -6,7 +6,7 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "../meta/void_t.hpp"
+#include "../core/void_t.hpp"
 #include "ref_obj.hpp"
 #include <utility>
 

@@ -4,6 +4,7 @@
 //
 // The documentation can be found at the library's page:
 // https://github.com/Ariox41/tmdesc
+
 #pragma once
 #include "../functional/invoke.hpp"
 #include "../meta/logical_operations.hpp"
@@ -13,14 +14,14 @@
 namespace tmdesc {
 
 /// `size` implementation for indexable type
-template <class T, class Enable = void> struct size_impl : meta::unimplemented {
+template <class T, class Enable = void> struct size_impl : core::unimplemented {
     /// v = [v0, v1, ..., vN] => size_c<N + 1>
-    template <class V> static constexpr auto apply(V&& v);
+    template <class V> static constexpr auto apply(V&& v) = delete;
 };
-
+ 
 /// Indexable types must implement the `at_impl` and `size_impl`.
 template <class T>
-struct is_finite_indexable : meta::recursive_and<meta::has_implementation<size_impl<T>>, is_indexable<T>> {};
+struct is_finite_indexable : meta::recursive_and<core::has_implementation<size_impl<T>>, is_indexable<T>> {};
 
 struct size_fo_t {
     template <class T> using impl_t = size_impl<std::decay_t<T>>;
