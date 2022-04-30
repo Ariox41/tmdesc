@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "../concepts/foldable.hpp"
-#include "../concepts/indexable.hpp"
+#include "../concepts/finite_indexable.hpp"
 #include "../functional/invoke.hpp"
 #include "../functional/ref_obj.hpp"
 #include "../meta/logical_operations.hpp"
@@ -108,7 +107,7 @@ private:
 };
 
 /// ===============================
-///            Indexable
+///           Finit Indexable
 /// ===============================
 
 /// `at` implementation for tuple
@@ -122,29 +121,7 @@ template <class... Ts> struct at_impl<tuple<Ts...>> {
 /// `size` implementation for tuple
 template <class... Ts> struct size_impl<tuple<Ts...>> {
     /// v = [v0, v1, ..., vN] => size_c<N + 1>
-    template <class V> static constexpr auto apply(V&&) noexcept { return sizeof...(Ts); }
-};
-
-/// ===============================
-///             Foldable
-/// ===============================
-
-/// `unpack` implementation for tuple
-template <class... Ts> struct unpack_impl<tuple<Ts...>> {
-    template <class V, class Fn, std::size_t... I>
-    static constexpr auto apply_impl(V&& v, Fn&& fn, index_sequence<I...>) noexcept(
-        noexcept(invoke(std::declval<Fn>(), detail::ebo_get<size_constant<I>>(std::declval<V>())...)))
-        -> decltype(invoke(std::declval<Fn>(), detail::ebo_get<size_constant<I>>(std::declval<V>())...)) {
-        return invoke(std::forward<Fn>(fn), detail::ebo_get<size_constant<I>>(std::forward<V>(v))...);
-    }
-
-    /// v = [v1, v2, ..., vN] => fn(v1, v2, ..., vN)
-    template <class V, class Fn>
-    static constexpr auto apply(V&& v, Fn&& fn) noexcept( //
-        noexcept(apply_impl(std::declval<V>(), std::declval<Fn>(), make_index_sequence<sizeof...(Ts)>{})))
-        -> decltype(apply_impl(std::declval<V>(), std::declval<Fn>(), make_index_sequence<sizeof...(Ts)>{})) {
-        return apply_impl(std::forward<V>(v), std::forward<Fn>(fn), make_index_sequence<sizeof...(Ts)>{});
-    }
+    template <class V> static constexpr auto apply(V&&) noexcept { return size_c<sizeof...(Ts)>; }
 };
 
 /// ===============================

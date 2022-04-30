@@ -5,24 +5,18 @@
 // The documentation can be found at the library's page:
 // https://github.com/Ariox41/tmdesc
 #pragma once
-#include "default.hpp"
+#include "../meta/implementable_function.hpp"
 
 namespace tmdesc {
 
 /// `at` implementation for indexable type
-template <class T, class Enable = meta::void_t<>> struct at_impl : _default {
+template <class T, class Enable = void> struct at_impl : meta::unimplemented {
     /// v = [v0, v1, ..., vN] => v [index]
     template <class I, class V> static constexpr auto apply(I&& index, V&& v);
 };
 
-/// `size` implementation for indexable type
-template <class T, class Enable = meta::void_t<>> struct size_impl : _default {
-    /// v = [v0, v1, ..., vN] => size_c<N + 1>
-    template <class V> static constexpr auto apply(V&& v);
-};
-
-template <class T>
-struct is_indexable : bool_constant<((!is_default<at_impl<T>>{}) && (!is_default<size_impl<T>>{}))> {};
+/// Indexable types must implement the `at_impl`.
+template <class T> struct is_indexable : meta::has_implementation<at_impl<T>> {};
 
 struct at_t {
     template <class T> using impl_t = at_impl<std::decay_t<T>>;
@@ -39,7 +33,9 @@ struct at_t {
 constexpr at_t at{};
 
 template <std::size_t I, class T>
-constexpr auto at_c(T&& v) noexcept(noexcept(at(size_c<I>, std::declval<T>()))) -> decltype(at(size_c<I>, std::declval<T>())) {
+constexpr auto at_c(T&& v) noexcept(noexcept(at(size_c<I>, std::declval<T>())))
+    -> decltype(at(size_c<I>, std::declval<T>())) {
     return at(size_c<I>, std::forward<T>(v));
 }
+
 } // namespace tmdesc

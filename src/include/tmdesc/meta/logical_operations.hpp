@@ -12,7 +12,6 @@
 
 namespace tmdesc {
 namespace meta {
-
 /// recursive conjuction without argument precomputation
 /// @see std::conjuction
 template <class...> struct recursive_and : true_type {};

@@ -9,8 +9,8 @@
 
 namespace tmdesc {
 /// type with value-semantic
-template <class T> struct type { using type = T; };
+template <class T> struct type_t { using type = T; };
 
-template <class T> constexpr type<T> type_c{};
+template <class T> constexpr type_t<T> type_c{};
 
 } // namespace tmdesc

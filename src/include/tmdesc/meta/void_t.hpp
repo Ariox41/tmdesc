@@ -7,11 +7,9 @@
 
 #pragma once
 namespace tmdesc {
-namespace meta {
 
 /// see std::void_t
 template<class... Ts> struct make_void { typedef void type;};
 template<class... Ts> using void_t = typename make_void<Ts...>::type;
 
-} // namespace meta
 } // namespace tmdesc

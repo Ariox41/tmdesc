@@ -1,5 +1,5 @@
 add_library(tmdesc INTERFACE)
-target_include_directories(tmdesc INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
+target_include_directories(tmdesc INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
 if(NOT CMAKE_VERSION VERSION_LESS 3.8)
     target_compile_features(tmdesc INTERFACE cxx_std_14)

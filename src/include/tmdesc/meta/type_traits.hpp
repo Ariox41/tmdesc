@@ -8,8 +8,7 @@
 #pragma once
 #include <type_traits>
 namespace tmdesc {
-namespace meta {
-
+namespace meta{
 template <class T> struct remove_cvref : public std::remove_cv<std::remove_reference_t<T>> {};
 template <class T> using remove_cvref_t = typename remove_cvref<T>::type;
 
@@ -20,6 +19,5 @@ constexpr bool is_constructible_v = is_constructible<T, Args...>::value;
 using std::is_nothrow_constructible;
 template <class T, class... Args>
 constexpr bool is_nothrow_constructible_v = is_nothrow_constructible<T, Args...>::value;
-
-} // namespace meta
+}
 } // namespace tmdesc

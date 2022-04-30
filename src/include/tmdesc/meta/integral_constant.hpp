@@ -17,13 +17,13 @@ using std::true_type;
 
 using std::index_sequence;
 using std::integer_sequence;
-using std::make_index_sequence;
-using std::make_integer_sequence;
 
 template <bool B> using bool_constant = std::integral_constant<bool, B>;
 template <bool B> constexpr bool_constant<B> bool_c{};
 
 template <std::size_t I> using size_constant = std::integral_constant<std::size_t, I>;
 template <std::size_t I> constexpr size_constant<I> size_c{};
+
+template <std::size_t I> constexpr std::make_index_sequence<I> index_sequence_up_to(size_constant<I>) noexcept { return {}; }
 
 } // namespace tmdesc
