@@ -91,12 +91,20 @@ public:
     }
 };
 
+/// tag of pair
+struct pair_tag {};
+
+namespace meta {
+/// pair tag
+template <class U1, class U2> struct tag_of<pair<U1, U2>> { using type = pair_tag; };
+} // namespace meta
+
 /// ===============================
 ///            Indexable
 /// ===============================
 
 /// `at` implementation for pair
-template <class T1, class T2> struct at_impl<pair<T1, T2>> {
+template <> struct at_impl<pair_tag> {
     /// v = [v0, v1, ..., vN] => v [index]
     template <class V> static constexpr decltype(auto) apply(size_constant<0>, V&& v) noexcept {
         return detail::ebo_get<size_constant<0>>(std::forward<V>(v));
@@ -107,7 +115,7 @@ template <class T1, class T2> struct at_impl<pair<T1, T2>> {
 };
 
 /// `size` implementation for pair
-template <class T1, class T2> struct size_impl<pair<T1, T2>> {
+template <> struct size_impl<pair_tag> {
     /// v = [v0, v1, ..., vN] => size_c<N + 1>
     template <class V> static constexpr auto apply(V&& v) noexcept { return size_c<2>; }
 };

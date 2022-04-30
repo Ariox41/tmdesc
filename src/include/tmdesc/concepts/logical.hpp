@@ -7,6 +7,7 @@
 #pragma once
 #include "../core/implementable_function.hpp"
 #include "../meta/logical_operations.hpp"
+#include "../meta/tag_of.hpp"
 
 namespace tmdesc {
 
@@ -24,13 +25,13 @@ template <class T, class Enable = void> struct negate_impl : core::unimplemented
 
 /// Logical types must implement the `eval_if` and `negate`.
 template <class T>
-struct is_logical
+struct Logical
   : meta::fast_values_and<core::has_implementation<eval_if_impl<T>>, core::has_implementation<negate_impl<T>>> {};
 
 struct eval_if_t {
-    template <class T> using impl_t = eval_if_impl<std::decay_t<T>>;
+    template <class T> using impl_t = eval_if_impl<meta::tag_of_t<T>>;
 
-    template <class C, class T, class E>
+    template <class C, class T, class E, std::enable_if_t<Logical<typename meta::tag_of<C>::type>{}, bool> = true>
     constexpr auto operator()(C&& cond, T&& then_, E&& else_) const
         noexcept(noexcept(impl_t<C>::apply(std::declval<C>(), std::declval<T>(), std::declval<E>())))
             -> decltype(impl_t<C>::apply(std::declval<C>(), std::declval<T>(), std::declval<E>())) {
@@ -42,9 +43,9 @@ struct eval_if_t {
 constexpr eval_if_t eval_if{};
 
 struct negate_t {
-    template <class T> using impl_t = negate_impl<std::decay_t<T>>;
+    template <class T> using impl_t = negate_impl<meta::tag_of<T>>;
 
-    template <class C>
+    template <class C, std::enable_if_t<Logical<typename meta::tag_of<C>::type>{}, bool> = true>
     constexpr auto operator()(C&& cond) const                   //
         noexcept(noexcept(impl_t<C>::apply(std::declval<C>()))) //
         -> decltype(impl_t<C>::apply(std::declval<C>())) {

@@ -6,7 +6,7 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "../core/void_t.hpp"
+#include "../meta/void_t.hpp"
 #include "ref_obj.hpp"
 #include <utility>
 
@@ -106,7 +106,7 @@ template <class Fn, class = void> struct invocable {
 };
 
 template <class Fn, class... Args>
-struct invocable<Fn(Args...), void_t<decltype(invoke(std::declval<Fn>(), std::declval<Args>()...))>> {
+struct invocable<Fn(Args...), meta::void_t<decltype(invoke(std::declval<Fn>(), std::declval<Args>()...))>> {
     using type                    = std::true_type;
     static constexpr bool nothrow = noexcept(invoke(std::declval<Fn>(), std::declval<Args>()...));
 };

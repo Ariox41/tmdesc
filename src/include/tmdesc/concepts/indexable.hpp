@@ -6,6 +6,7 @@
 // https://github.com/Ariox41/tmdesc
 #pragma once
 #include "../core/implementable_function.hpp"
+#include "../meta/tag_of.hpp"
 
 namespace tmdesc {
 
@@ -16,12 +17,12 @@ template <class T, class Enable = void> struct at_impl : core::unimplemented {
 };
 
 /// Indexable types must implement the `at_impl`.
-template <class T> struct is_indexable : core::has_implementation<at_impl<T>> {};
+template <class T> struct Indexable : core::has_implementation<at_impl<T>> {};
 
 struct at_t {
-    template <class T> using impl_t = at_impl<std::decay_t<T>>;
+    template <class T> using impl_t = at_impl<meta::tag_of_t<T>>;
 
-    template <class I, class V, std::enable_if_t<is_indexable<std::decay_t<V>>{}, bool> = true>
+    template <class I, class V, std::enable_if_t<Indexable<typename meta::tag_of<V>::type>{}, bool> = true>
     constexpr auto operator()(I&& i, V&& v) const //
         noexcept(noexcept(impl_t<V>::apply(std::declval<I>(), std::declval<V>())))
             -> decltype(impl_t<V>::apply(std::declval<I>(), std::declval<V>())) {
@@ -32,7 +33,7 @@ struct at_t {
 /// v = [v1, v2, ..., vN] => v [index]
 constexpr at_t at{};
 
-template <std::size_t I, class T, std::enable_if_t<is_indexable<std::decay_t<T>>{}, bool> = true>
+template <std::size_t I, class T, std::enable_if_t<Indexable<typename meta::tag_of<T>::type>{}, bool> = true>
 constexpr auto at_c(T&& v) noexcept(noexcept(at(size_c<I>, std::declval<T>())))
     -> decltype(at(size_c<I>, std::declval<T>())) {
     return at(size_c<I>, std::forward<T>(v));

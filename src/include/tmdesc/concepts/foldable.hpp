@@ -7,6 +7,7 @@
 
 #pragma once
 #include "../core/implementable_function.hpp"
+#include "../meta/tag_of.hpp"
 
 namespace tmdesc {
 
@@ -17,12 +18,12 @@ template <class T, class Enable = void> struct unpack_impl : core::unimplemented
 };
 /// Foldable types must implement the `unpack_impl`.
 /// \todo Are there any cases when it is easier to define `fold_left` and use it to implement `unpack`?
-template <class T> struct is_foldable : core::has_implementation<unpack_impl<T>> {};
+template <class T> struct Foldable : core::has_implementation<unpack_impl<T>> {};
 
 struct unpack_t {
-    template <class T> using impl_t = unpack_impl<std::decay_t<T>>;
+    template <class T> using impl_t = unpack_impl<meta::tag_of_t<T>>;
 
-    template <class T, class Fn, std::enable_if_t<is_foldable<std::decay_t<T>>{}, bool> = true>
+    template <class T, class Fn, std::enable_if_t<Foldable<typename meta::tag_of<T>::type>{}, bool> = true>
     constexpr auto operator()(T&& v, Fn&& fn) const //
         noexcept(noexcept(impl_t<T>::apply(std::declval<T>(), std::declval<Fn>())))
             -> decltype(impl_t<T>::apply(std::declval<T>(), std::declval<Fn>())) {

@@ -9,11 +9,13 @@
 
 #include "../concepts/finite_indexable.hpp"
 #include "../functional/invoke.hpp"
+#include "../functional/make.hpp"
 #include "../functional/ref_obj.hpp"
 #include "../meta/logical_operations.hpp"
 #include "detail/tuple.hpp"
 
 namespace tmdesc {
+
 /// full constexpr inherit-based tuple without recursive implementation
 template <class... Ts> struct tuple final : detail::tuple_storage<std::make_index_sequence<sizeof...(Ts)>, Ts...> {
 private:
@@ -106,12 +108,20 @@ private:
     }
 };
 
+/// tag of tuple
+struct tuple_tag {};
+
+namespace meta {
+/// tuple tag
+template <class... Ts> struct tag_of<tuple<Ts...>> { using type = tuple_tag; };
+} // namespace meta
+
 /// ===============================
 ///           Finit Indexable
 /// ===============================
 
 /// `at` implementation for tuple
-template <class... Ts> struct at_impl<tuple<Ts...>> {
+template <> struct at_impl<tuple_tag> {
     /// v = [v0, v1, ..., vN] => v [index]
     template <std::size_t I, class V> static constexpr decltype(auto) apply(size_constant<I>, V&& v) noexcept {
         return detail::ebo_get<size_constant<I>>(std::forward<V>(v));
@@ -119,14 +129,22 @@ template <class... Ts> struct at_impl<tuple<Ts...>> {
 };
 
 /// `size` implementation for tuple
-template <class... Ts> struct size_impl<tuple<Ts...>> {
+template <> struct size_impl<tuple_tag> {
     /// v = [v0, v1, ..., vN] => size_c<N + 1>
-    template <class V> static constexpr auto apply(V&&) noexcept { return size_c<sizeof...(Ts)>; }
+    template <class... Ts> static constexpr auto apply(const tuple<Ts...>&) noexcept { return size_c<sizeof...(Ts)>; }
 };
 
 /// ===============================
 ///               Make
 /// ===============================
+
+template <> struct make_impl<tuple_tag> {
+    template <typename... Ts>
+    static constexpr tuple<try_unwrap_ref_obj_type_t<std::decay_t<Ts>>...> apply(Ts&&... args) noexcept(
+        meta::fast_values_and_v<std::is_nothrow_constructible<try_unwrap_ref_obj_type_t<std::decay_t<Ts>>, Ts>...>) {
+        return {std::forward<Ts>(args)...};
+    }
+};
 
 /// @see std::make_tuple
 #ifdef TMDESC_DOXYGEN
