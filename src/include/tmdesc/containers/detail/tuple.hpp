@@ -15,6 +15,7 @@ template <class Indexer, class... Ts> struct tuple_storage;
 
 template <std::size_t... Is, class... Ts>
 struct tuple_storage<std::index_sequence<Is...>, Ts...> : public detail::ebo<size_constant<Is>, Ts>... {
+    struct direct_constructor {};
 protected:
     constexpr tuple_storage()                     = default;
     constexpr tuple_storage(tuple_storage&&)      = default;
@@ -22,7 +23,6 @@ protected:
     constexpr tuple_storage& operator=(tuple_storage&&) = default;
     constexpr tuple_storage& operator=(const tuple_storage&) = default;
 
-    struct direct_constructor {};
 
     template <class... Args>
     constexpr tuple_storage(direct_constructor, Args&&... args) noexcept(

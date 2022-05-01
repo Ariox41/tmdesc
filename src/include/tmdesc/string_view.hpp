@@ -217,7 +217,7 @@ public:
     zstring_view(const std::string& src) noexcept
       : string_view(src.c_str(), src.size()) {}
 
-    zstring_view(nullptr_t)   = delete;
+    zstring_view(std::nullptr_t)   = delete;
     zstring_view(string_view) = delete;
 
     constexpr const char* c_str() const noexcept { return data(); }
