@@ -1,9 +1,10 @@
 #include <doctest/doctest.h>
 
+#include "../test_helpers.hpp"
+#include <memory>
 #include <string>
-#include <tmdesc/string_view.hpp>
 #include <tmdesc/containers/tuple.hpp>
-#include "test_helpers.hpp"
+#include <tmdesc/string_view.hpp>
 
 static_assert(std::is_trivial<tmdesc::tuple<>>{}, "");
 static_assert(std::is_trivial<tmdesc::tuple<int>>{}, "");
@@ -45,78 +46,72 @@ static_assert(!std::is_trivial<tmdesc::tuple<std::string>>{}, "");
 static_assert(!std::is_trivially_destructible<tmdesc::tuple<std::string>>{}, "");
 static_assert(!std::is_nothrow_copy_constructible<tmdesc::tuple<std::string>>{}, "");
 static_assert(!std::is_nothrow_copy_assignable<tmdesc::tuple<std::string>>{}, "");
+static_assert(std::is_nothrow_default_constructible<tmdesc::tuple<std::string>>{}, "");
+static_assert(std::is_nothrow_move_constructible<tmdesc::tuple<std::string>>{}, "");
+static_assert(std::is_nothrow_move_assignable<tmdesc::tuple<std::string>>{}, "");
 static_assert(std::is_copy_constructible<tmdesc::tuple<std::string>>{}, "");
 static_assert(std::is_copy_assignable<tmdesc::tuple<std::string>>{}, "");
+static_assert(!std::is_nothrow_copy_constructible<tmdesc::tuple<std::string>>{}, "");
+static_assert(!std::is_nothrow_copy_assignable<tmdesc::tuple<std::string>>{}, "");
 
-static_assert(!std::is_trivial<tmdesc::tuple<std::string, std::string>>{}, "");
-static_assert(!std::is_trivially_destructible<tmdesc::tuple<std::string, std::string>>{}, "");
-static_assert(!std::is_nothrow_copy_constructible<tmdesc::tuple<std::string, std::string>>{}, "");
-static_assert(!std::is_nothrow_copy_assignable<tmdesc::tuple<std::string, std::string>>{}, "");
-static_assert(std::is_copy_constructible<tmdesc::tuple<std::string, std::string>>{}, "");
-static_assert(std::is_copy_assignable<tmdesc::tuple<std::string, std::string>>{}, "");
+using unique_ptr_pair_tuple = tmdesc::tuple<std::unique_ptr<std::string>, std::unique_ptr<int>>;
 
-struct nothrow_visitor {
-    template <class T> constexpr bool operator()(const T&) const noexcept { return false; }
-};
-struct throw_visitor {
-    template <class T> constexpr bool operator()(const T&) const noexcept(false) {
-        throw "";
-        return false;
-    }
-};
-
-//static_assert (!noexcept (tmdesc::repeat_n<4>(throw_visitor{})), "");
-
-// static_assert(noexcept(tmdesc::for_each(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
-
-// static_assert(noexcept(tmdesc::transform_to<::tmdesc::tuple>(tmdesc::make_tuple(1, '2', "42"), nothrow_visitor{})), "");
-
-// ?? msvc sometimes considers a function as `noexcept(true)`
-// ?? if `noexcept(false)` is in its description, but `throw` is not called in its implementation.
-//static_assert (!noexcept (tmdesc::tuple_foreach(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
-//static_assert (!noexcept (tmdesc::transform_t<tuple>_to(tmdesc::make_tuple(1, '2', "42"), throw_visitor{})), "");
-
-// implementation test
-
-
-
-
+static_assert(!std::is_trivial<unique_ptr_pair_tuple>{}, "");
+static_assert(!std::is_trivially_destructible<unique_ptr_pair_tuple>{}, "");
+static_assert(!std::is_nothrow_copy_constructible<unique_ptr_pair_tuple>{}, "");
+static_assert(!std::is_nothrow_copy_assignable<unique_ptr_pair_tuple>{}, "");
+static_assert(std::is_nothrow_default_constructible<unique_ptr_pair_tuple>{}, "");
+static_assert(std::is_nothrow_move_constructible<unique_ptr_pair_tuple>{}, "");
+static_assert(std::is_nothrow_move_assignable<unique_ptr_pair_tuple>{}, "");
+static_assert(!std::is_copy_constructible<unique_ptr_pair_tuple>{}, "");
+static_assert(!std::is_copy_assignable<unique_ptr_pair_tuple>{}, "");
 
 TEST_CASE("tuple initialisation and get") {
-    SUBCASE("empty tuple constuctors and assigment") {
-        constexpr tmdesc::tuple<> t;
-        constexpr tmdesc::tuple<> cloned = t;
-        constexpr tmdesc::tuple<> moved  = std::move(cloned);
-        tmdesc::tuple<> assigned;
-        assigned = moved;
-        tmdesc::tuple<> move_assigned;
-        move_assigned = std::move(assigned);
-        (void)move_assigned;
-    }
-    SUBCASE("single element tuple constuctors and assigment") {
-        constexpr tmdesc::tuple<int> t{42};
-        constexpr tmdesc::tuple<int> cloned = t;
-        constexpr tmdesc::tuple<int> moved  = std::move(cloned);
-        tmdesc::tuple<int> assigned;
-        assigned = moved;
-        tmdesc::tuple<int> move_assigned;
-        move_assigned = std::move(assigned);
-        (void)move_assigned;
-
-        SUBCASE("set and get") {
-            tmdesc::at_c<0>(assigned) = 24;
-            REQUIRE(tmdesc::at_c<0>(assigned) == 24);
-            REQUIRE(tmdesc::at_c<0>(t) == 42);
+    SUBCASE("empty tuple") {
+        SUBCASE("creation") {
+            constexpr tmdesc::tuple<> t;
+            constexpr tmdesc::tuple<> cloned = t;
+            constexpr tmdesc::tuple<> moved  = std::move(cloned);
+            static_assert(tmdesc::size(t) == 0, "");
+            SUBCASE("assignment") {
+                tmdesc::tuple<> assigned;
+                assigned = moved;
+                tmdesc::tuple<> move_assigned;
+                move_assigned = std::move(assigned);
+                (void)move_assigned;
+            }
         }
-        SUBCASE("to tuple of reference") {
-            tmdesc::tuple<const int&> lvalue_ref_tuple = move_assigned;
-            tmdesc::tuple<int&&> rvalue_ref_tuple = std::move(move_assigned);
+    }
+    SUBCASE("single element tuple") {
+        SUBCASE("creation") {
+            constexpr tmdesc::tuple<int> t{42};
+            constexpr tmdesc::tuple<int> cloned = t;
+            constexpr tmdesc::tuple<int> moved  = std::move(cloned);
+            static_assert(tmdesc::size(t) == 1, "");
 
-            REQUIRE(tmdesc::at_c<0>(lvalue_ref_tuple) == 42);
-            REQUIRE(tmdesc::at_c<0>(rvalue_ref_tuple) == 42);
-            tmdesc::at_c<0>(move_assigned) = 11;
-            REQUIRE(tmdesc::at_c<0>(lvalue_ref_tuple) == 11);
-            REQUIRE(tmdesc::at_c<0>(rvalue_ref_tuple) == 11);
+            SUBCASE("assignment") {
+                tmdesc::tuple<int> assigned;
+                assigned = moved;
+                tmdesc::tuple<int> move_assigned;
+                move_assigned = std::move(assigned);
+                (void)move_assigned;
+
+                SUBCASE("set and get") {
+                    tmdesc::at_c<0>(assigned) = 24;
+                    REQUIRE(tmdesc::at_c<0>(assigned) == 24);
+                    REQUIRE(tmdesc::at_c<0>(t) == 42);
+                }
+                SUBCASE("assignment to a tuple of reference") {
+                    tmdesc::tuple<const int&> lvalue_ref_tuple = move_assigned;
+                    tmdesc::tuple<int&&> rvalue_ref_tuple      = std::move(move_assigned);
+
+                    REQUIRE(tmdesc::at_c<0>(lvalue_ref_tuple) == 42);
+                    REQUIRE(tmdesc::at_c<0>(rvalue_ref_tuple) == 42);
+                    tmdesc::at_c<0>(move_assigned) = 11;
+                    REQUIRE(tmdesc::at_c<0>(lvalue_ref_tuple) == 11);
+                    REQUIRE(tmdesc::at_c<0>(rvalue_ref_tuple) == 11);
+                }
+            }
         }
     }
     SUBCASE("multiple element tuple creation") {
@@ -198,13 +193,13 @@ TEST_CASE("tuple initialisation and get") {
 //    }
 //}
 
-//struct accumulator {
-//    int& res;
+// struct accumulator {
+//     int& res;
 //    template <class T> constexpr void operator()(const T& v) const noexcept { res += int(v); }
 //};
 
-//template <class T>
-//constexpr int
+// template <class T>
+// constexpr int
 //accumulate(const T& tuple) noexcept(noexcept(tmdesc::for_each(tuple, accumulator{std::declval<int&>()}))) {
 //    int res = 0;
 //    tmdesc::for_each(tuple, accumulator{res});
@@ -216,7 +211,7 @@ TEST_CASE("tuple initialisation and get") {
 //    constexpr auto sum   = (1 + int('2') + 42);
 //    STATIC_NOTHROW_CHECK(accumulate(tuple) == sum);
 //}
-//struct increment_fn {
+// struct increment_fn {
 //    template <class T> constexpr auto operator()(const T& v) const noexcept { return v + T(1); }
 //};
 

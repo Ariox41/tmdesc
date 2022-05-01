@@ -23,10 +23,10 @@ template <class T, class Enable = void> struct size_impl : core::unimplemented {
 template <class T>
 struct FiniteIndexable : meta::recursive_and<core::has_implementation<size_impl<T>>, Indexable<T>> {};
 
-struct size_fo_t {
+struct size_of_t {
     template <class T> using impl_t = size_impl<meta::tag_of_t<T>>;
 
-    template <class I, class V, std::enable_if_t<FiniteIndexable<typename meta::tag_of<V>::type>{}, bool> = true>
+    template <class V, std::enable_if_t<FiniteIndexable<typename meta::tag_of<V>::type>{}, bool> = true>
     constexpr auto operator()(V&& v) const                      //
         noexcept(noexcept(impl_t<V>::apply(std::declval<V>()))) //
         -> decltype(impl_t<V>::apply(std::declval<V>())) {
@@ -35,7 +35,7 @@ struct size_fo_t {
 };
 
 /// v = [v1, v2, ..., vN] => v [index]
-constexpr size_fo_t size{};
+constexpr size_of_t size{};
 
 // ========== FinitIndexable => Foldable  ==============
 template <class T> struct unpack_impl<T, std::enable_if_t<FiniteIndexable<T>{}>> {

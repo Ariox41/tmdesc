@@ -4,17 +4,11 @@ if(NOT doctest_FOUND)
   return()
 endif()
 
-set(TESTS_SRC
-  main.cpp
-  string_view_test.cpp
-  tuple_test.cpp
-  struct_algorithm.cpp
-  struct_tie_test.cpp
-  functional/ref_obj_test.cpp
-  functional/invoke_test.cpp
-)
 
-add_executable(all_tests ${TESTS_SRC})
+file(GLOB_RECURSE tmdesc_tests_src "**.cpp")
+
+
+add_executable(all_tests ${tmdesc_tests_src})
 target_link_libraries(all_tests PRIVATE doctest::doctest tmdesc)
 
 set_property(TARGET all_tests PROPERTY CXX_STANDARD 14)

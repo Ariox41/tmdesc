@@ -25,7 +25,7 @@ protected:
 
 
     template <class... Args>
-    constexpr tuple_storage(direct_constructor, Args&&... args) noexcept(
+    explicit constexpr tuple_storage(direct_constructor, Args&&... args) noexcept(
         meta::fast_values_and_v<std::is_nothrow_constructible<Ts, Args&&>...>)
       : detail::ebo<size_constant<Is>, Ts>{std::forward<Args>(args)}... {}
 };

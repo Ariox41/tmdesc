@@ -37,7 +37,8 @@ public:
                                                      bool_constant<(sizeof...(Ts) == sizeof...(Args))>,
                                                      meta::fast_values_and<std::is_constructible<Ts, Args&&>...>>,
                                bool> = true>
-    constexpr tuple(Args&&... args) noexcept(meta::fast_values_and_v<std::is_nothrow_constructible<Ts, Args&&>...>)
+    explicit constexpr tuple(Args&&... args) noexcept(
+        meta::fast_values_and_v<std::is_nothrow_constructible<Ts, Args&&>...>)
       : super_t{direct_constructor{}, static_cast<Args&&>(args)...} {}
 
     /// Converting copy-constructor
@@ -107,6 +108,7 @@ private:
                                                  void(), true)...};
     }
 };
+template <> struct tuple<> {};
 
 /// tag of tuple
 struct tuple_tag {};
@@ -131,7 +133,9 @@ template <> struct at_impl<tuple_tag> {
 /// `size` implementation for tuple
 template <> struct size_impl<tuple_tag> {
     /// v = [v0, v1, ..., vN] => size_c<N + 1>
-    template <class... Ts> static constexpr auto apply(const tuple<Ts...>&) noexcept { return size_c<sizeof...(Ts)>; }
+    template <class... Ts> static constexpr size_constant<sizeof...(Ts)> apply(const tuple<Ts...>&) noexcept {
+        return {};
+    }
 };
 
 /// ===============================
