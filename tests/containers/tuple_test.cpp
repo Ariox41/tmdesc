@@ -68,12 +68,12 @@ static_assert(!std::is_copy_assignable<unique_ptr_pair_tuple>{}, "");
 
 TEST_CASE("tuple initialisation and get") {
     SUBCASE("empty tuple") {
-        SUBCASE("creation") {
+        WHEN("creation") {
             constexpr tmdesc::tuple<> t;
             constexpr tmdesc::tuple<> cloned = t;
             constexpr tmdesc::tuple<> moved  = std::move(cloned);
             static_assert(tmdesc::size(t) == 0, "");
-            SUBCASE("assignment") {
+            AND_WHEN("assignment") {
                 tmdesc::tuple<> assigned;
                 assigned = moved;
                 tmdesc::tuple<> move_assigned;
@@ -83,25 +83,25 @@ TEST_CASE("tuple initialisation and get") {
         }
     }
     SUBCASE("single element tuple") {
-        SUBCASE("creation") {
+        WHEN("creation") {
             constexpr tmdesc::tuple<int> t{42};
             constexpr tmdesc::tuple<int> cloned = t;
             constexpr tmdesc::tuple<int> moved  = std::move(cloned);
             static_assert(tmdesc::size(t) == 1, "");
 
-            SUBCASE("assignment") {
+            AND_WHEN("assignment") {
                 tmdesc::tuple<int> assigned;
                 assigned = moved;
                 tmdesc::tuple<int> move_assigned;
                 move_assigned = std::move(assigned);
                 (void)move_assigned;
 
-                SUBCASE("set and get") {
+                AND_WHEN("set and get") {
                     tmdesc::at_c<0>(assigned) = 24;
                     REQUIRE(tmdesc::at_c<0>(assigned) == 24);
                     REQUIRE(tmdesc::at_c<0>(t) == 42);
                 }
-                SUBCASE("assignment to a tuple of reference") {
+                AND_WHEN("assignment to a tuple of reference") {
                     tmdesc::tuple<const int&> lvalue_ref_tuple = move_assigned;
                     tmdesc::tuple<int&&> rvalue_ref_tuple      = std::move(move_assigned);
 

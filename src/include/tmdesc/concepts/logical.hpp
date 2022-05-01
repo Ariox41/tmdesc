@@ -56,4 +56,6 @@ struct negate_t {
 /// negate(negate(cond)) => cond
 constexpr negate_t negate{};
 
+
+
 } // namespace tmdesc
