@@ -1,4 +1,4 @@
-// Copyright Victor Smirnov 2021
+// Copyright Victor Smirnov 2021-2022
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 //
@@ -6,13 +6,10 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "type_info/get_type_info.hpp"
-#include <boost/hana/fwd/unpack.hpp>
+#include "type_info/type_info_of.hpp"
+#include <boost/hana/unpack.hpp>
 namespace tmdesc {
-namespace tags {
-struct foldable_struct_tag {};
-
-} // namespace tags
+struct described_structure_tag {};
 
 namespace detail {
 
@@ -28,14 +25,14 @@ template <class T, class Fn> struct unpack_foldable_struct_impl {
 
 namespace boost {
 namespace hana {
-template <class T> struct tag_of<T, when<!is_nothing(::tmdesc::static_type_members_v<T>)>> {
-    using type = ::tmdesc::tags::foldable_struct_tag;
+template <class T> struct tag_of<T, when<!is_nothing(::tmdesc::type_members_info_of(type_c<T>))>> {
+    using type = ::tmdesc::described_structure_tag;
 };
-template <> struct unpack_impl<::tmdesc::tags::foldable_struct_tag> {
-    template <typename Xs, typename F> static constexpr auto apply(Xs&& xs, F&& f) {
+template <> struct unpack_impl<::tmdesc::described_structure_tag> {
+    template <typename V, typename Fn> static constexpr auto apply(V&& v, Fn&& fn) {
         return unpack(
-            ::tmdesc::static_type_members_v<std::decay_t<Xs>>,
-            ::tmdesc::detail::unpack_foldable_struct_impl<Xs&&, F&&>{static_cast<Xs&&>(xs), static_cast<F&&>(f)});
+            ::tmdesc::detail::members_cache_unchecked<std::decay_t<V>>,
+            ::tmdesc::detail::unpack_foldable_struct_impl<V&&, Fn&&>{static_cast<V&&>(v), static_cast<Fn&&>(fn)});
     }
 };
 } // namespace hana

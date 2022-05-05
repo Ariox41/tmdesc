@@ -1,4 +1,4 @@
-// Copyright Victor Smirnov 2021
+// Copyright Victor Smirnov 2021-2022
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 //
@@ -72,6 +72,7 @@ public:
     /// if(tmdesc::string_view(getString()).ends_with("suffix"){
     ///     /*...*/
     /// }
+    /// \endcode 
     /// \see zstring_view::string_view(const std::basic_string<char, Ts...>&)
     template <class... Ts>
     string_view(const std::basic_string<char, Ts...>& str) noexcept
@@ -217,8 +218,8 @@ public:
     zstring_view(const std::string& src) noexcept
       : string_view(src.c_str(), src.size()) {}
 
-    zstring_view(std::nullptr_t)   = delete;
-    zstring_view(string_view) = delete;
+    zstring_view(std::nullptr_t) = delete;
+    zstring_view(string_view)    = delete;
 
     constexpr const char* c_str() const noexcept { return data(); }
 };

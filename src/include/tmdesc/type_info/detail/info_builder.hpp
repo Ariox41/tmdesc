@@ -18,8 +18,8 @@ struct _default {};
 namespace hana = boost::hana;
 
 namespace detail {
-template <class M, class O> struct memptr_function_object {
-    explicit constexpr memptr_function_object(M O::*member_ptr) noexcept
+template <class M, class O> struct memfn_getter {
+    explicit constexpr memfn_getter(M O::*member_ptr) noexcept
       : member_ptr_(member_ptr) {}
 
     using member_type = M;
@@ -50,9 +50,9 @@ public:
 
     // wraps attributes to attribute_set
     template <class... KS, class... VS>
-    constexpr attribute_set<hana::map<hana::pair<hana::type<KS>, VS>...>>
+    constexpr attribute_set<boost::hana::map<boost::hana::pair<boost::hana::type<KS>, VS>...>>
     attributes(attribute<KS, VS>... attributes) const {
-        return {hana::make_map(hana::make_pair(hana::type_c<KS>, attributes.value)...)};
+        return {boost::hana::make_map(boost::hana::make_pair(boost::hana::type_c<KS>, attributes.value)...)};
     }
 
     // wraps information about a member
@@ -61,7 +61,8 @@ public:
     template <class M, class U> constexpr auto member(zstring_view name, M U::*member) const {
         static_assert(std::is_base_of<U, T>{}, "the member must be a pointer to member of T or its base class");
         M T::*real_memptr = member;
-        return detail::member_info<M, T, hana::map<>>{name, real_memptr, hana::map<>{}};
+        return member_info<M, detail::memfn_getter<M, T>, boost::hana::map<>>{
+            name, detail::memfn_getter<M, T>{real_memptr}, boost::hana::map<>{}};
     }
 
     // wraps information about a member
@@ -72,34 +73,37 @@ public:
     constexpr auto member(zstring_view name, M U::*member, attribute_set<AS> attributes_) const {
         static_assert(std::is_base_of<U, T>{}, "the member must be a pointer to member of T or its base class");
         M T::*real_memptr = member;
-        return member_info<M, T, AS>{name, real_memptr, std::move(attributes_.value)};
+        return member_info<M, detail::memfn_getter<M, T>, AS>{name, detail::memfn_getter<M, T>{real_memptr},
+                                                              std::move(attributes_.attributes)};
     }
 
     // wraps information about member set to single struct
-    template <class... M, class... T, class... A>
-    constexpr member_set_info<hana::tuple<member_info<M, T, A>...>> members(member_info<M, T, A>... members_) const {
-        return {haba::make_tuple(std::move(members))};
+    template <class... M, class... G, class... A>
+    constexpr member_set_info<boost::hana::tuple<member_info<M, G, A>...>>
+    members(member_info<M, G, A>... members_) const {
+        return {boost::hana::make_tuple(std::move(members_)...)};
     }
 
     // wraps information about type set to single struct
     // @param member_set_ - type members info,  the result of the `members` function
-    template <class M> constexpr type_info<hana::optional<M>, hana::map<>> type(member_set_info<M> member_set_) const {
-        return {hana::just(std::move(member_set_)), hana::map<>{}};
+    template <class M>
+    constexpr type_info<T, boost::hana::optional<M>, boost::hana::map<>> type(member_set_info<M> member_set_) const {
+        return {boost::hana::just(std::move(member_set_.members)), boost::hana::map<>{}};
     }
 
     // wraps information about type set to single struct
     // @param attributes_ - type attributes, the result of the `attributes` function.
-    template <class AS> constexpr type_info<hana::optional<>, AS> type(attribute_set<AS> attributes_) const {
-        return {hana::nothing, std::move(attributes_.value)};
+    template <class AS> constexpr type_info<T, boost::hana::optional<>, AS> type(attribute_set<AS> attributes_) const {
+        return {boost::hana::nothing, std::move(attributes_.attributes)};
     }
 
     // wraps information about type set to single struct
     // @param member_set_ - type members info,  the result of the `members` function
     // @param attributes_ - type attributes, the result of the `attributes` function.
     template <class AS, class M>
-    constexpr type_info<hana::optional<M>, AS> type(attribute_set<AS> attributes_,
-                                                    member_set_info<M> member_set_) const noexcept {
-        return {hana::just(std::move(member_set_)), std::move(attributes_)};
+    constexpr type_info<T, boost::hana::optional<M>, AS> type(attribute_set<AS> attributes_,
+                                                              member_set_info<M> member_set_) const noexcept {
+        return {boost::hana::just(std::move(member_set_.members)), std::move(attributes_.attributes)};
     }
 };
 

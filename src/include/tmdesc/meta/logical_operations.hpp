@@ -1,4 +1,4 @@
-// Copyright Victor Smirnov 2021
+// Copyright Victor Smirnov 2021-2022
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 //
@@ -6,11 +6,14 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "../core/integral_constant.hpp"
+#include <type_traits>
 #include <initializer_list>
 
 namespace tmdesc {
 namespace meta {
+using std::true_type;
+using std::false_type;
+
 /// recursive conjuction without argument precomputation
 /// @see std::conjuction
 template <class...> struct recursive_and : true_type {};
@@ -36,7 +39,7 @@ template <bool... BS> struct fast_and : std::is_same<fast_and<BS...>, fast_and<(
 template <bool... BS> constexpr bool fast_and_v = fast_and<BS...>::value;
 
 /// Non-recursive disjunction.
-/// Unlike @ref disjunction, `fast_or` is not recursive, but the price is the precomputation of the argument values.
+/// Unlike @ref recursive_or, `fast_or` is not recursive, but the price is the precomputation of the argument values.
 template <bool... BS> struct fast_or : negation<std::is_same<fast_or<BS...>, fast_or<(BS, false)...>>> {};
 template <bool... BS> constexpr bool fast_or_v = fast_or<BS...>::value;
 

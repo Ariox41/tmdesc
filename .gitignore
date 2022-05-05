@@ -40,3 +40,5 @@ CMakeLists.txt.user.*
 # default build dirrectory
 /build/*
 /build*/*
+/docs/*
+

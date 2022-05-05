@@ -1,52 +1,47 @@
-/*
+#include "test_helpers.hpp"
 #include <doctest/doctest.h>
- #include <string>
- #include <tmdesc/algorithm/for_each.hpp>
- #include <tmdesc/struct_as_tuple.hpp>
+#include <string>
+//#include <tmdesc/foldable_struct.hpp>
+#include <tmdesc/tmdesc_fwd.hpp>
+#include <tmdesc/type_info/type_info_of.hpp>
 
- #define STATIC_CHECK(...)           \
-     static_assert(__VA_ARGS__, ""); \
-     CHECK(__VA_ARGS__)
+namespace hana = boost::hana;
+namespace ns {
+struct s1 {
+    int m0;
+    char m1;
+    unsigned int m2;
+};
 
- #define STATIC_NOTHROW_CHECK(...)             \
-     static_assert(__VA_ARGS__, "");           \
-     static_assert(noexcept(__VA_ARGS__), ""); \
-     CHECK(__VA_ARGS__)
+template <class Impl> constexpr auto tmdesc_info(tmdesc::info_builder<s1, Impl> builder) {
+    return builder.type(                                //
+        builder.members(builder.member("1", &s1::m0),   //
+                        builder.member("10", &s1::m1),  //
+                        builder.member("100", &s1::m2)) //
+    );
+}
+} // namespace ns
 
- namespace ns {
- struct s1 {
-     int m0;
-     char m1;
-     unsigned int m2;
- };
+TEST_CASE("tuple algorithm for struct") {
+    // SUBCASE("simple get") {
+    //     constexpr ns::s1 v1{41, '3', 56};
 
- template <class Impl> constexpr auto tmdesc_info(tmdesc::type_t<s1>, tmdesc::info_builder<Impl> builder) {
-     return builder(builder.member("m0", &s1::m0), builder.member("m1", &s1::m1), builder.member("m2", &s1::m2));
- }
- } // namespace ns
+    //     STATIC_NOTHROW_CHECK(41 == hana::at_c<0>(v1));
+    //     STATIC_NOTHROW_CHECK('3' ==  hana::at_c<1>(v1));
+    //     STATIC_NOTHROW_CHECK(56 ==  hana::at_c<1>(v1));
+    // }
+    SUBCASE("for_each struct member") {
+        // constexpr ns::s1 v{41, '3', 56};
+        // constexpr auto ti = hana::sfinae(tmdesc::detail::type_info_of)(hana::type_c<ns::s1>);
+        // STATIC_CHECK(!hana::is_nothing(ti));
+        // constexpr auto mi = hana::chain(ti, tmdesc::detail::get_members);
+        // STATIC_CHECK(!hana::is_nothing(mi));
+        // constexpr auto mi0 = mi.value()[hana::size_c<0>];
+        // STATIC_CHECK(mi0.name() == "1");
+        // STATIC_CHECK(mi0.getter()(v) == 41);
+  
 
- struct add {
-     int& acc;
-     template <class T> constexpr void operator()(const T& value) const noexcept { acc += int(value); }
- };
-
- template <class T> constexpr int calc_member_sum(const T& t) noexcept {
-     int acc = 0;
-     ::tmdesc::for_each(t, add{acc});
-     return acc;
- }
-
- TEST_CASE("tuple algorithm for struct") {
-     SUBCASE("simple get") {
-         constexpr ns::s1 s1{41, '3', 56};
-
-         STATIC_NOTHROW_CHECK(41 == ::tmdesc::get<0>(s1));
-         STATIC_NOTHROW_CHECK('3' == ::tmdesc::get<1>(s1));
-         STATIC_NOTHROW_CHECK(56 == ::tmdesc::get<2>(s1));
-     }
-     SUBCASE("tuple foreach") {
-         constexpr ns::s1 s1{41, '3', 56};
-         STATIC_NOTHROW_CHECK(calc_member_sum(s1) == (41 + '3' + 56));
-     }
- }
-*/
+        //  STATIC_CHECK(tmdesc::type_info_of(hana::type_c<ns::s1>) != hana::nothing);
+        //STATIC_CHECK_AND_POSSIBLE_NOTHROW(hana::fold_left(v, 0, hana::plus) == (41 + '3' + 56));
+    }
+}

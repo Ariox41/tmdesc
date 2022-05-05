@@ -9,9 +9,9 @@
 #include <boost/hana/map.hpp>
 namespace tmdesc {
 
-/// Contains the name of the member,
-/// a functional object for getting a reference to the member from the owner object,
-/// and a set of attributes of the member.
+/**
+ * @brief  Contains information about data member of the type.
+ */
 template <class T, class Getter, class AS> struct member_info {
     using value_type = T;
 
@@ -20,13 +20,16 @@ template <class T, class Getter, class AS> struct member_info {
       , getter_(std::move(getter))
       , attributes_(std::move(attributes)) {}
 
-    /// \return member name.
+    /// @return member type id
+    constexpr auto type_id() const noexcept { return boost::hana::type_c<T>; }
+
+    /// @return member name.
     constexpr zstring_view name() const noexcept { return member_name_; }
 
-    /// \return functional object for getting a reference to the member from the owner object.
-    const Getter& getter() const noexcept { return getter_; }
+    /// @return functional object for getting a reference to the member from the owner object.
+    constexpr const Getter& getter() const noexcept { return getter_; }
 
-    /// \return `map<pair<type<Tag>, Value>...>` of member attributes
+    /// @return `map<pair<type<Tag>, Value>...>` of member attributes
     constexpr const AS& attributes() const noexcept { return attributes_; }
 
 private:
