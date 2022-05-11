@@ -24,8 +24,8 @@ namespace tmdesc {
  * If the list of members is not specified, this structure cannot be serialized in xml.
  * But another serialization method can be specified in the type attributes.
  */
-template <class T, class MS, class AS> struct type_info {
-    constexpr type_info(MS members, AS attributes)
+template <class T, class MS, class AS> struct type_info_wrapper {
+    constexpr type_info_wrapper(MS members, AS attributes)
       : members_(std::move(members))
       , attributes_(std::move(attributes)) {}
 

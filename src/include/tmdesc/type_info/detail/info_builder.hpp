@@ -8,8 +8,8 @@
 #pragma once
 #include "../../string_view.hpp"
 #include "../../tmdesc_fwd.hpp"
-#include "../member_info.hpp"
-#include "../type_info.hpp"
+#include "../member_info.hpp" 
+#include "../type_info_wrapper.hpp"
 #include <boost/hana/map.hpp>
 #include <boost/hana/optional.hpp>
 #include <boost/hana/tuple.hpp>
@@ -87,13 +87,13 @@ public:
     // wraps information about type set to single struct
     // @param member_set_ - type members info,  the result of the `members` function
     template <class M>
-    constexpr type_info<T, boost::hana::optional<M>, boost::hana::map<>> type(member_set_info<M> member_set_) const {
+    constexpr type_info_wrapper<T, boost::hana::optional<M>, boost::hana::map<>> type(member_set_info<M> member_set_) const {
         return {boost::hana::just(std::move(member_set_.members)), boost::hana::map<>{}};
     }
 
     // wraps information about type set to single struct
     // @param attributes_ - type attributes, the result of the `attributes` function.
-    template <class AS> constexpr type_info<T, boost::hana::optional<>, AS> type(attribute_set<AS> attributes_) const {
+    template <class AS> constexpr type_info_wrapper<T, boost::hana::optional<>, AS> type(attribute_set<AS> attributes_) const {
         return {boost::hana::nothing, std::move(attributes_.attributes)};
     }
 
@@ -101,7 +101,7 @@ public:
     // @param member_set_ - type members info,  the result of the `members` function
     // @param attributes_ - type attributes, the result of the `attributes` function.
     template <class AS, class M>
-    constexpr type_info<T, boost::hana::optional<M>, AS> type(attribute_set<AS> attributes_,
+    constexpr type_info_wrapper<T, boost::hana::optional<M>, AS> type(attribute_set<AS> attributes_,
                                                               member_set_info<M> member_set_) const noexcept {
         return {boost::hana::just(std::move(member_set_.members)), std::move(attributes_.attributes)};
     }

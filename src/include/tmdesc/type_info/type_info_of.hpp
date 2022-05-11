@@ -74,11 +74,11 @@ struct type_attributes_of_t {
 };
 
 /**
- * @return an optional value of type @ref type_info
+ * @return an optional value of type @ref type_info_wrapper
  *
  * @details
  * If the `tmdesc_info(info_builder<T, unspecified>)` free function is implemented for type T (see `tmdesc_fwd.hpp`),
- * then return `just(type_info<unspecified>{})`.
+ * then return `just(type_info_wrapper<unspecified>{})`.
  * Otherwise, return `nothing`.
  */
 constexpr type_info_of_t type_info_of{};
