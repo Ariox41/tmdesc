@@ -139,7 +139,7 @@ TEST_SUITE("string_view") {
         CHECK(str == "45");
 
         CHECK(str.substr(0, 2000) == "45");
-        CHECK(str.substr(3, 0) == tmdesc::string_view{});
+        CHECK_THROWS_AS(str.substr(3, 0), std::out_of_range);
     }
     TEST_CASE("string_view starts_with") {
         tmdesc::string_view str = "12345678";

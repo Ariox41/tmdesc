@@ -6,6 +6,7 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
+#include <stdexcept>
 #include <string>
 
 namespace tmdesc {
@@ -15,16 +16,16 @@ class string_view;
 constexpr bool operator==(string_view lha, string_view rha) noexcept;
 constexpr bool operator!=(string_view lha, string_view rha) noexcept;
 
-/// constexpr string_view for c++ 14.
-/// The interface is based on c++17 std::string_view and boost::string_view
-/// \see class zstring_view
+/**
+ * @brief constexpr string_view for c++ 14.
+ * @details The interface is based on c++ 17 std::string_view and boost::string_view
+ * @see class zstring_view
+ */
 class string_view {
     const char* data_;
     std::size_t size_;
 
 public:
-    static constexpr std::size_t npos = std::string::npos;
-
     using value_type      = const char;
     using const_pointer   = const value_type*;
     using pointer         = const_pointer;
@@ -34,6 +35,8 @@ public:
     using iterator        = const_iterator;
     using size_type       = std::size_t;
     using difference_type = std::ptrdiff_t;
+
+    static constexpr size_type npos = std::string::npos;
 
     /// Constructs an empty string_view.
     /// \post
@@ -72,7 +75,7 @@ public:
     /// if(tmdesc::string_view(getString()).ends_with("suffix"){
     ///     /*...*/
     /// }
-    /// \endcode 
+    /// \endcode
     /// \see zstring_view::string_view(const std::basic_string<char, Ts...>&)
     template <class... Ts>
     string_view(const std::basic_string<char, Ts...>& str) noexcept
@@ -97,50 +100,102 @@ public:
     constexpr char front() const noexcept { return (*this)[0]; }
     constexpr char back() const noexcept { return (*this)[size() - 1]; }
 
-    /// \return substring {pos, pos + count}
-    /// \note noexcept, unlike std::string_view.
-    /// if(pos > size()) pos = size();
-    /// if((pos + count) > size()) count = size() - pos;
-    constexpr string_view substr(std::size_t pos, std::size_t count = npos) const noexcept {
+    /**
+     * @brief Returns a view of the substring [fpos, fpos + fcount), where fcount is a smaller of `count` and `size() - pos`.
+     *
+     * @throw std::out_of_range if pos > size()
+     *
+     * @param pos position of the first character.
+     * @param count requested length.
+     * @return View of the substring [fpos, fpos + fcount).
+     */
+    constexpr string_view substr(std::size_t pos, std::size_t count = npos) const {
         if (pos > size_)
-            pos = size_;
+            throw std::out_of_range("string_view::substr out_of_range");
         if (pos + count > size_)
             count = size_ - pos;
         return string_view(data_ + pos, count);
     }
 
-    /// \return prefix with size of min(n, this->size())
-    constexpr string_view prefix(std::size_t n) const noexcept {
-        if (n > size_)
-            n = size_;
-        return string_view{data_, n};
+    /**
+     * @brief Returns a view of the substring (0, fcount], where fcount is a smaller of `count` and `size()`.
+     *
+     * @param count number of characters in prefix.
+     *
+     * @return View of the substring (0, fcount].
+     */
+    constexpr string_view prefix(std::size_t count) const noexcept {
+        if (count > size_)
+            count = size_;
+        return string_view{data_, count};
     }
 
-    /// \return suffix with size of min(n, this->size())
-    constexpr string_view suffix(std::size_t n) const noexcept {
-        if (n > size_)
-            n = size_;
-        return string_view{data_ + size_ - n, n};
+    /**
+     * @brief Returns a view of the substring (size() - fcount, fcount], where fcount is a smaller of `count` and `size()`.
+     *
+     * @param count number of characters in suffix.
+     *
+     * @return View of the substring (0, fcount].
+     */
+    constexpr string_view suffix(std::size_t count) const noexcept {
+        if (count > size_)
+            count = size_;
+        return string_view{data_ + size_ - count, count};
     }
 
-    /// Remove prefix with size of min(n, this->size())
-    constexpr void remove_prefix(std::size_t n) noexcept {
-        if (n > size_)
-            n = size_;
-        data_ += n;
-        size_ -= n;
+    /**
+     * @brief Moves the start of the view forward by fcount characters, where fcount is a smaller of `count` and `size()`.
+     *
+     * @param count number of characters to remove from the start of the view.
+     */
+    constexpr void remove_prefix(std::size_t count) noexcept {
+        if (count > size_)
+            count = size_;
+        data_ += count;
+        size_ -= count;
     }
 
-    /// Remove suffix with size of min(n, this->size())
-    constexpr void remove_suffix(std::size_t n) noexcept {
-        if (n > size_)
-            n = size_;
-        size_ -= n;
+    /**
+     * @brief Moves the end of the view back by fcount characters, where fcount is a smaller of `count` and `size()`.
+     *
+     * @param count number of characters to remove from the end of the view.
+     */
+    constexpr void remove_suffix(std::size_t count) noexcept {
+        if (count > size_)
+            count = size_;
+        size_ -= count;
     }
 
+    /**
+     * @brief Checks if the string view begins with the given prefix
+     *
+     * @param ch a single character
+     * @return `true` if the string view begins with the provided prefix, `false` otherwise
+     */
     constexpr bool starts_with(char ch) const noexcept { return size() > 0 && front() == ch; }
+
+    /**
+     * @brief Checks if the string view begins with the given prefix
+     *
+     * @param s a string view
+     * @return `true` if the string view begins with the provided prefix< `false` otherwise
+     */
     constexpr bool starts_with(string_view s) const noexcept { return prefix(s.size()) == s; }
+
+    /**
+     * @brief Checks if the string view ends with the given suffix
+     *
+     * @param ch a single character
+     * @return `true` if the string view ends with the provided suffix, `false` otherwise.
+     */
     constexpr bool ends_with(char ch) const noexcept { return size() > 0 && back() == ch; }
+
+    /**
+     * @brief Checks if the string view ends with the given suffix
+     *
+     * @param s a string view
+     * @return `true` if the string view ends with the provided suffix, `false` otherwise.
+     */
     constexpr bool ends_with(string_view s) const noexcept { return suffix(s.size()) == s; }
 
     constexpr std::size_t find_first_of(char ch) const noexcept {
@@ -174,10 +229,6 @@ public:
     /// \note not compatible with std::string_view, but compatible with boost::string_view
     std::string to_string() const { return std::string(data(), size()); }
 
-    template <class T> constexpr T into() const noexcept(noexcept(T{std::declval<const char*>(), size_t{}})) {
-        return T{data(), size()};
-    }
-
 private:
     static constexpr std::size_t cstringsize(const char* str) noexcept {
         std::size_t size = 0;
@@ -188,29 +239,32 @@ private:
     }
 };
 
-/// Null-terminated string_view.
-/// Constucts from const char* and std::string only, default constructor equals zstring_view("").
+/**
+ * @brief Null-terminated string_view.
+ * Constucts from const char* and std::string only, default constructor equals to zstring_view("").
+ */
 class zstring_view : public string_view {
 public:
-    /// Default constructor equals to zstring_view("")
-    /// \post
-    /// size() == 0
-    /// *data() == '\0'
-    /// *c_str() == '\0'
+    /**
+     * @brief Default constructor equals to zstring_view("")
+     * @post
+     * size() == 0
+     * *data() == '\0'
+     * *c_str() == '\0'
+     */
     constexpr zstring_view() noexcept
       : zstring_view("") {}
 
     /// Construct from null-terminated string.
-    /// \post
+    /// @post
     /// data() == cstr
     /// c_str() == cstr
     /// size() == (cstr == nullptr? std::strlen(cstr): 0)
-    /// \note implicit constructor, like std::string_view
     constexpr zstring_view(const char* cstr) noexcept
       : string_view(cstr) {}
 
     /// Construct from std::string
-    /// \post
+    /// @post
     /// data() == src.c_str()
     /// size() == src.size()
     /// c_str() == src.c_str()
@@ -221,6 +275,11 @@ public:
     zstring_view(std::nullptr_t) = delete;
     zstring_view(string_view)    = delete;
 
+    /**
+     * @brief Returns a pointer to an array that contains a null-terminated sequence of characters (i.e., a C-string)
+     *
+     * @return a pointer to an array that contains a null-terminated sequence of characters (i.e., a C-string)
+     */
     constexpr const char* c_str() const noexcept { return data(); }
 };
 
