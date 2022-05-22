@@ -13,6 +13,9 @@ struct Fn {
 
 constexpr int free_function(const Fn& fn, int k) noexcept { return 100 * fn.v * k; }
 
+Fn tfn;
+auto r = ::tmdesc::invoke(&Fn::mem_fn, tfn, 0);
+
 static_assert(tmdesc::is_invocable_v<const Fn&, int>, "");
 static_assert(std::is_same<tmdesc::invoke_result_t<const Fn&, int>, int>::value, "");
 static_assert(tmdesc::is_nothrow_invocable_v<const Fn&, int>, "");

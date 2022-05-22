@@ -29,13 +29,13 @@ template <class R> struct ref_obj {
     ref_obj() = delete;
 
     constexpr ref_obj(R&& r) noexcept
-      : _ptr(&r) {}
+      : ptr_(&r) {}
     constexpr ref_obj(const ref_obj&) noexcept = default;
 
     constexpr ref_obj& operator=(const ref_obj& x) noexcept = default;
 
-    constexpr operator T&&() const noexcept { return *_ptr; }
-    constexpr T&& get() const noexcept { return *_ptr; }
+    constexpr operator R() const noexcept { return get(); }
+    constexpr R get() const noexcept { return static_cast<R>(*ptr_); }
 
 private:
     type* ptr_;
@@ -87,7 +87,7 @@ struct pointer_to_ref_fn {
 
 /// Functional object for explicit dereference pointer-like object  to `ref_obj`
 /// @note `ref_obj<Pointer>` is converted to `ref_obj<deref<Pointer>>`
-/// @warning In the case of proxy objects, the link may be invalid             
+/// @warning In the case of proxy objects, the link may be invalid
 constexpr pointer_to_ref_fn pointer_to_ref{};
 
 } // namespace tmdesc
