@@ -15,9 +15,9 @@ namespace tmdesc {
 template <class T, class Getter, class AS> struct member_info {
     using value_type = T;
 
-    constexpr member_info(zstring_view name, Getter getter, AS attributes)
+    constexpr member_info(zstring_view name, Getter accessor, AS attributes)
       : member_name_(name)
-      , getter_(std::move(getter))
+      , getter_(std::move(accessor))
       , attributes_(std::move(attributes)) {}
 
     /// @return member type id
@@ -27,7 +27,7 @@ template <class T, class Getter, class AS> struct member_info {
     constexpr zstring_view name() const noexcept { return member_name_; }
 
     /// @return functional object for getting a reference to the member from the owner object.
-    constexpr const Getter& getter() const noexcept { return getter_; }
+    constexpr const Getter& accessor() const noexcept { return getter_; }
 
     /// @return `map<pair<type<Tag>, Value>...>` of member attributes
     constexpr const AS& attributes() const noexcept { return attributes_; }

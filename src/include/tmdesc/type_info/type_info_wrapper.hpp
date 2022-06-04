@@ -16,8 +16,8 @@ namespace tmdesc {
  * Type attributes are represented as a map `{tag->value}`, where tag is the type (identifier)
  * of the attribute, and value is an arbitrary value specified for this attribute.
  * The set of attributes may be empty.
- * 
- * @note 
+ *
+ * @note
  * The set of members is represented as `nothing` or `just(tuple<member_info<unspecified>>{})`.
  * There is a difference between an empty list of members, and no list.
  * For example, a structure with an empty list of members corresponds to the xml representation `<StructName />`.
@@ -30,13 +30,15 @@ template <class T, class MS, class AS> struct type_info_wrapper {
       , attributes_(std::move(attributes)) {}
 
     /**
-     * @brief the members is an optional tuple of @ref member_info objects.
+     * @brief Returnsan optional tuple of @ref member_info objects.
      * @return `just(tuple(members...)))` or `nothing`.
      */
     constexpr const MS& members() const noexcept { return members_; }
 
-    /// @return `map<pair<Tag, Value>...>` of type attributes.
-    /// @note If a type name is specified in the description, it is available by the `tags::type_name` tag, its value is of the `zstring_view` type
+    /**
+     * @brief Returns an optional map{Tag->Value} of type attributes.
+     * @return just(map{Tag->Value}) or `nothing`.
+     */
     constexpr const AS& attributes() const noexcept { return attributes_; }
 
 private:

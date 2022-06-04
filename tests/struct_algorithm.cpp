@@ -3,7 +3,7 @@
 #include <string>
 //#include <tmdesc/foldable_struct.hpp>
 #include <tmdesc/tmdesc_fwd.hpp>
-#include <tmdesc/type_info/type_info_of.hpp>
+#include <tmdesc/get_type_info.hpp>
 
 namespace hana = boost::hana;
 namespace ns {
@@ -38,10 +38,10 @@ TEST_CASE("tuple algorithm for struct") {
         // STATIC_CHECK(!hana::is_nothing(mi));
         // constexpr auto mi0 = mi.value()[hana::size_c<0>];
         // STATIC_CHECK(mi0.name() == "1");
-        // STATIC_CHECK(mi0.getter()(v) == 41);
+        // STATIC_CHECK(mi0.accessor()(v) == 41);
   
 
         //  STATIC_CHECK(tmdesc::type_info_of(hana::type_c<ns::s1>) != hana::nothing);
-        //STATIC_CHECK_AND_POSSIBLE_NOTHROW(hana::fold_left(v, 0, hana::plus) == (41 + '3' + 56));
+        //STATIC_CHECK(hana::fold_left(v, 0, hana::plus) == (41 + '3' + 56));
     }
 }
