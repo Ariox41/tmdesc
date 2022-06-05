@@ -40,7 +40,7 @@ TEST_CASE("type info of") {
         STATIC_CHECK(type_name == hana::just(tmdesc::zstring_view("empty_struct_with_typename")));
 
         constexpr auto&& tm = tmdesc::get_type_members_info(hana::typeid_(value));
-        STATIC_CHECK(tm == hana::just(hana::make_tuple()));
+        STATIC_CHECK(tm == hana::just(hana::make_basic_tuple()));
     }
     SUBCASE("single_value_without_attributes") {
         // the value is not constexpr, but the information is constexpr
@@ -55,7 +55,7 @@ TEST_CASE("type info of") {
         constexpr auto&& tm = tmdesc::get_type_members_info(hana::typeid_(value));
         STATIC_CHECK(hana::transform(tm, hana::size) == hana::just(hana::size_c<1>));
 
-        constexpr auto&& m0 = tm.value()[hana::size_c<0>];
+        constexpr auto&& m0 = hana::at_c<0>(tm.value());
         STATIC_CHECK(m0.name() == "member");
         STATIC_CHECK(m0.attributes() == hana::make_map());
         REQUIRE(m0.accessor()(value) == "test_value");
@@ -73,9 +73,9 @@ TEST_CASE("type info of") {
         constexpr auto&& tm = tmdesc::get_type_members_info(hana::typeid_(value));
         STATIC_CHECK(hana::transform(tm, hana::size) == hana::just(hana::size_c<3>));
 
-        constexpr auto&& m0 = tm.value()[hana::size_c<0>];
-        constexpr auto&& m1 = tm.value()[hana::size_c<1>];
-        constexpr auto&& m2 = tm.value()[hana::size_c<2>];
+        constexpr auto&& m0 = hana::at_c<0>(tm.value());
+        constexpr auto&& m1 = hana::at_c<1>(tm.value());
+        constexpr auto&& m2 = hana::at_c<2>(tm.value());
         STATIC_CHECK(m0.name() == "1");
         STATIC_CHECK(m1.name() == "10");
         STATIC_CHECK(m2.name() == "100");
@@ -105,9 +105,9 @@ TEST_CASE("type info of") {
         constexpr auto&& tm = tmdesc::get_type_members_info(hana::typeid_(value));
         STATIC_CHECK(hana::transform(tm, hana::size) == hana::just(hana::size_c<3>));
 
-        constexpr auto&& m0 = tm.value()[hana::size_c<0>];
-        constexpr auto&& m1 = tm.value()[hana::size_c<1>];
-        constexpr auto&& m2 = tm.value()[hana::size_c<2>];
+        constexpr auto&& m0 = hana::at_c<0>(tm.value());
+        constexpr auto&& m1 = hana::at_c<1>(tm.value());
+        constexpr auto&& m2 = hana::at_c<2>(tm.value());
         STATIC_CHECK(m0.name() == "M0");
         STATIC_CHECK(m1.name() == "M1");
         STATIC_CHECK(m2.name() == "M2");

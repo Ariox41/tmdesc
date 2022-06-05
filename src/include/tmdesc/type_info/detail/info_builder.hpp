@@ -12,14 +12,14 @@
 #include "../type_info_wrapper.hpp"
 #include <boost/hana/map.hpp>
 #include <boost/hana/optional.hpp>
-#include <boost/hana/tuple.hpp>
+#include <boost/hana/basic_tuple.hpp>
 namespace tmdesc {
 struct _default {};
 namespace hana = boost::hana;
 
 namespace detail {
-template <class M, class O> struct memfn_getter {
-    explicit constexpr memfn_getter(M O::*member_ptr) noexcept
+template <class M, class O> struct memfn_accessor {
+    explicit constexpr memfn_accessor(M O::*member_ptr) noexcept
       : member_ptr_(member_ptr) {}
 
     using member_type = M;
@@ -61,8 +61,8 @@ public:
     template <class M, class U> constexpr auto member(zstring_view name, M U::*member) const {
         static_assert(std::is_base_of<U, T>{}, "the member must be a pointer to member of T or its base class");
         M T::*real_memptr = member;
-        return member_info<M, detail::memfn_getter<M, T>, boost::hana::map<>>{
-            name, detail::memfn_getter<M, T>{real_memptr}, boost::hana::map<>{}};
+        return member_info<M, detail::memfn_accessor<M, T>, boost::hana::map<>>{
+            name, detail::memfn_accessor<M, T>{real_memptr}, boost::hana::map<>{}};
     }
 
     // wraps information about a member
@@ -73,15 +73,15 @@ public:
     constexpr auto member(zstring_view name, M U::*member, attribute_set<AS> attributes_) const {
         static_assert(std::is_base_of<U, T>{}, "the member must be a pointer to member of T or its base class");
         M T::*real_memptr = member;
-        return member_info<M, detail::memfn_getter<M, T>, AS>{name, detail::memfn_getter<M, T>{real_memptr},
+        return member_info<M, detail::memfn_accessor<M, T>, AS>{name, detail::memfn_accessor<M, T>{real_memptr},
                                                               std::move(attributes_.attributes)};
     }
 
     // wraps information about member set to single struct
     template <class... M, class... G, class... A>
-    constexpr member_set_info<boost::hana::tuple<member_info<M, G, A>...>>
+    constexpr member_set_info<boost::hana::basic_tuple<member_info<M, G, A>...>>
     members(member_info<M, G, A>... members_) const {
-        return {boost::hana::make_tuple(std::move(members_)...)};
+        return {boost::hana::make_basic_tuple(std::move(members_)...)};
     }
 
     // wraps information about type set to single struct

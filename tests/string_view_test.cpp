@@ -1,15 +1,4 @@
 #include "test_helpers.hpp"
-#include <tmdesc/string_view.hpp>
-
-namespace doctest {
-template <> struct StringMaker<tmdesc::string_view> {
-    static String convert(tmdesc::string_view str) { return String(str.data(), unsigned(str.size())); }
-};
-template <> struct StringMaker<tmdesc::zstring_view> {
-    static String convert(tmdesc::string_view str) { return String(str.data(), unsigned(str.size())); }
-};
-
-} // namespace doctest
 
 static_assert(std::is_nothrow_default_constructible<tmdesc::string_view>{}, "");
 static_assert(std::is_nothrow_copy_constructible<tmdesc::string_view>{}, "");
