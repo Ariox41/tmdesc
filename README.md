@@ -1,11 +1,11 @@
 # tmdesc
 Serialisation-oriented type members description library for c++ 14.
 
-**Work in progress**.
+**Status: Work in progress. Interfaces have disadvantages**.
 
 # Goals
 * iteration by structure data members
-* custom optional flags for the type or any data members of the type 
+* custom optional attributes for the type or any data members of the type 
 * fast compilation
 * completely constexpr
 * с++ 14 support 
