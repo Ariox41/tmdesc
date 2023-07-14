@@ -18,19 +18,36 @@ namespace tmdesc {
 class string_view : public std::string_view {
 public:
     using std::string_view::string_view;
+    using std::string_view::operator=;
 
-    /// \return prefix with size of min(n, this->size())
+    template <typename T, std::enable_if_t<std::is_base_of_v<std::string, T>, bool> = true>
+    string_view(const T& src) noexcept
+      : string_view{src.data(), src.size()} {}
+
+    /// @return prefix with size of min(n, this->size())
     constexpr string_view prefix(std::size_t n) const noexcept {
         if (n > this->size())
             n = this->size();
         return string_view{this->data(), n};
     }
 
-    /// \return suffix with size of min(n, this->size())
+    /// @return suffix with size of min(n, this->size())
     constexpr string_view suffix(std::size_t n) const noexcept {
         if (n > this->size())
             n = this->size();
         return string_view{this->data() + this->size() - n, n};
+    }
+
+    /// @return substring {pos, pos + count}
+    /// @note noexcept, unlike substr.
+    /// if(pos > size()) pos = size();
+    /// if((pos + count) > size()) count = size() - pos;
+    constexpr string_view substr_safe(std::size_t pos, std::size_t count = npos) const noexcept {
+        if (pos > this->size())
+            pos = this->size();
+        if (pos + count > this->size())
+            count = this->size() - pos;
+        return string_view(this->data() + pos, count);
     }
 
     /// starts_with implementation for c++ 17
@@ -44,6 +61,16 @@ public:
 
     /// ends_with implementation for c++ 17
     constexpr bool ends_with(string_view s) const noexcept { return this->suffix(s.size()) == s; }
+
+    /// Remove prefix with size of min(n, this->size())
+    constexpr void remove_prefix_safe(std::size_t n) noexcept {
+        std::string_view::remove_prefix(n > this->size() ? this->size() : n);
+    }
+
+    /// Remove suffix with size of min(n, this->size())
+    constexpr void remove_suffix_safe(std::size_t n) noexcept {
+        std::string_view::remove_suffix(n > this->size() ? this->size() : n);
+    }
 
     /// convert to std::string or other compability type
     template <class String = std::string>
