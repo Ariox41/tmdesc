@@ -1,7 +1,7 @@
 # tmdesc
 Serialisation-oriented type members description library for c++ 14.
 
-**Work in progress**.
+**Work in progress. Probably abandoned.**.
 
 # Goals
 * iteration by structure data members
