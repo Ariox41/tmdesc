@@ -1,4 +1,4 @@
-// Copyright Victor Smirnov 2021
+// Copyright Victor Smirnov 2023
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 //
@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <type_traits> //< for integral_constant
 #include <utility>     //< for integer_sequence
 
@@ -18,8 +19,13 @@ namespace tmdesc {
 template <class T, T V> struct integral_constant : std::integral_constant<T, V> {
     constexpr integral_constant<T, -V> operator-() const noexcept { return {}; }
 };
-template <std::size_t I> using size_constant = std::integral_constant<std::size_t, I>;
+template <std::size_t I> using size_constant       = std::integral_constant<std::size_t, I>;
+template <std::ptrdiff_t I> using ptrdiff_constant = std::integral_constant<std::ptrdiff_t, I>;
+template <int I> using int_constant                = std::integral_constant<int, I>;
+
 template <std::size_t I> constexpr size_constant<I> size_c{};
+template <std::ptrdiff_t I> constexpr ptrdiff_constant<I> ptrdiff_c{};
+template <int I> constexpr int_constant<I> int_c{};
 
 template <bool V> struct integral_constant<bool, V> : std::integral_constant<bool, V> {
     constexpr integral_constant<bool, !V> operator!() const noexcept { return {}; }

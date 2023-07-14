@@ -106,7 +106,7 @@ template <class Fn, class = void> struct invocable {
 };
 
 template <class Fn, class... Args>
-struct invocable<Fn(Args...), meta::void_t<decltype(invoke(std::declval<Fn>(), std::declval<Args>()...))>> {
+struct invocable<Fn(Args...), std::void_t<decltype(invoke(std::declval<Fn>(), std::declval<Args>()...))>> {
     using type                    = std::true_type;
     static constexpr bool nothrow = noexcept(invoke(std::declval<Fn>(), std::declval<Args>()...));
 };

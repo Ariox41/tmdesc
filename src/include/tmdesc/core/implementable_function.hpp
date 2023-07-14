@@ -6,8 +6,9 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "../meta/void_t.hpp"
-#include "integral_constant.hpp"
+#include <tmdesc/core/integral_constant.hpp>
+#include <type_traits>
+
 namespace tmdesc {
 namespace core {
 /// Base class for marking type as unimplemented function
@@ -19,13 +20,13 @@ struct default_implementation {};
 template <class T, class = void> struct has_implementation : true_type {};
 
 template <class T>
-struct has_implementation<T, meta::void_t<decltype(static_cast<const unimplemented&>(std::declval<const T&>()))>>
+struct has_implementation<T, std::void_t<decltype(static_cast<const unimplemented&>(std::declval<const T&>()))>>
   : false_type {};
 
 template <class T, class = void> struct is_default_implementation : false_type {};
 
 template <class T>
 struct is_default_implementation<
-    T, meta::void_t<decltype(static_cast<const default_implementation&>(std::declval<const T&>()))>> : true_type {};
+    T, std::void_t<decltype(static_cast<const default_implementation&>(std::declval<const T&>()))>> : true_type {};
 } // namespace core
 } // namespace tmdesc
