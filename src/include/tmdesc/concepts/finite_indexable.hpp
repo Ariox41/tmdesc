@@ -6,7 +6,7 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "../functional/invoke.hpp"
+#include <functional>
 #include "../meta/logical_operations.hpp"
 #include "foldable.hpp"
 #include "indexable.hpp"
@@ -41,9 +41,9 @@ constexpr size_of_t size{};
 template <class T> struct unpack_impl<T, std::enable_if_t<FiniteIndexable<T>{}>> {
     template <class V, class Fn, std::size_t... I>
     static constexpr auto apply_impl(V&& v, Fn&& fn, index_sequence<I...>) //
-        noexcept(noexcept(invoke(std::declval<Fn>(), at(size_c<I>, std::declval<V>())...)))
-            -> decltype(invoke(std::declval<Fn>(), at(size_c<I>, std::declval<V>())...)) {
-        return invoke(std::forward<Fn>(fn), at(size_c<I>, std::forward<V>(v))...);
+        noexcept(noexcept(std::invoke(std::declval<Fn>(), at(size_c<I>, std::declval<V>())...)))
+            -> decltype(std::invoke(std::declval<Fn>(), at(size_c<I>, std::declval<V>())...)) {
+        return std::invoke(std::forward<Fn>(fn), at(size_c<I>, std::forward<V>(v))...);
     }
 
     template <class V, class Fn>

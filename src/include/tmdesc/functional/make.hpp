@@ -8,6 +8,7 @@
 #pragma once
 #include <type_traits>
 namespace tmdesc {
+namespace details {
 template <class DataType, class Enable = void> struct make_impl {
     template <class... Args>
     static constexpr auto apply(Args&&... args) noexcept(noexcept(DataType{std::declval<Args>()...}))
@@ -15,12 +16,13 @@ template <class DataType, class Enable = void> struct make_impl {
         return DataType{static_cast<Args&&>(args)...};
     }
 };
+} // namespace details
 
 template <class T> struct make_t {
-    using impl_t = make_impl<std::decay_t<T>>;
+    using impl_t = details::make_impl<std::decay_t<T>>;
 
     template <class... Args>
-    constexpr auto operator()(Args&&... args) const noexcept(    //
+    constexpr auto operator()(Args&&... args) const noexcept( //
         noexcept(impl_t::apply(std::declval<Args>()...)))     //
         -> decltype(impl_t::apply(std::declval<Args>()...)) { //
         return impl_t::apply(static_cast<Args&&>(args)...);   //
@@ -31,7 +33,7 @@ template <class T> struct make_t {
 ///
 /// @details
 /// If T is a "normal" type, the function simply calls the constructor with arguments.
-/// If T is a tag, If T is a tag, creates an instance of the type associated with the tag
+/// If T is a tag, creates an instance of the type associated with the tag
 ///
 /// @warning
 /// If T is a tag, but no make implementation is defined for it,

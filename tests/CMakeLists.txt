@@ -5,7 +5,7 @@ if(NOT doctest_FOUND)
 endif()
 
 
-file(GLOB_RECURSE tmdesc_tests_src "**.cpp")
+file(GLOB_RECURSE tmdesc_tests_src "*.cpp")
 
 
 add_executable(all_tests ${tmdesc_tests_src})
