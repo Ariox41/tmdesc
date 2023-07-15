@@ -2,7 +2,6 @@
 #include <tmdesc/functional/variadic_fold_left.hpp>
 
 struct sub_t {
-    constexpr int operator()(int lha) const noexcept { return lha; }
     constexpr int operator()(int lha, int rha) const noexcept { return lha - rha; }
 };
 inline constexpr sub_t sub{};
