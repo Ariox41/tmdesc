@@ -6,13 +6,14 @@ project (tmdesc VERSION  0.5 LANGUAGES CXX)
 set(TMDESC_IS_MAIN_PROJECT OFF)
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(TMDESC_IS_MAIN_PROJECT ON)
+    set(CXX_STANDART 17)
     message(INFO " tmdesc is main project. Compilation bench enabled")
 endif()
 
 add_subdirectory(src)
 
 if(TMDESC_IS_MAIN_PROJECT)
-    add_subdirectory(compilation_bench)
+    #add_subdirectory(compilation_bench)
 
     add_subdirectory(examples)
 

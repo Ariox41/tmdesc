@@ -1,6 +1,6 @@
 #include "../test_helpers.hpp"
-#include <functional>
 #include <tmdesc/functional/invoke.hpp>
+#include <tmdesc/functional/ref_obj.hpp>
 
 namespace nothrow_const {
 struct Fn {
@@ -12,9 +12,6 @@ struct Fn {
 };
 
 constexpr int free_function(const Fn& fn, int k) noexcept { return 100 * fn.v * k; }
-
-Fn tfn;
-auto r = ::tmdesc::invoke(&Fn::mem_fn, tfn, 0);
 
 static_assert(tmdesc::is_invocable_v<const Fn&, int>, "");
 static_assert(std::is_same<tmdesc::invoke_result_t<const Fn&, int>, int>::value, "");
@@ -129,4 +126,14 @@ int mul42(int v) { return v * 42; }
 TEST_CASE("invoke ref_obj as function") {
     CHECK(tmdesc::invoke(tmdesc::ref(get42)) == 42);
     CHECK(tmdesc::invoke(tmdesc::ref(mul42), 10) == 420);
+}
+
+struct multi_arg_fn{
+    int operator()(char v1, int v2, unsigned v3, unsigned char v4, int v5) const noexcept{
+        return v1 + v2 + v3 +v4 +v5;
+    }
+};
+inline constexpr multi_arg_fn multi_arg;
+TEST_CASE("invoke ref_obj as function") {
+    CHECK(tmdesc::invoke(multi_arg, 1, 2, 3, 4, 5) == 1 + 2 + 3 +  4 + 5);
 }

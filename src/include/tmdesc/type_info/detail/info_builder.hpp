@@ -6,108 +6,78 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
-#include "../../string_view.hpp"
-#include "../../tmdesc_fwd.hpp"
-#include "../member_info.hpp"
-#include "../type_info_wrapper.hpp"
-#include <boost/hana/map.hpp>
-#include <boost/hana/optional.hpp>
 #include <boost/hana/basic_tuple.hpp>
+#include <boost/hana/map.hpp>
+#include <boost/hana/pair.hpp>
+#include <tmdesc/functional/invoke.hpp>
+#include <tmdesc/hana_fwd.hpp>
+#include <tmdesc/string_view.hpp>
+#include <tmdesc/tmdesc_fwd.hpp>
+#include <tmdesc/type_info/member_info.hpp>
+#include <tmdesc/type_info/type_info.hpp>
 namespace tmdesc {
 struct _default {};
-namespace hana = boost::hana;
-
 namespace detail {
-template <class M, class O> struct memfn_accessor {
-    explicit constexpr memfn_accessor(M O::*member_ptr) noexcept
-      : member_ptr_(member_ptr) {}
-
-    using member_type = M;
-
-    constexpr const M& operator()(const O& owner) const noexcept { return owner.*member_ptr_; }
-    constexpr M& operator()(O& owner) const noexcept { return owner.*member_ptr_; }
-    constexpr M&& operator()(O&& owner) const noexcept { return std::move(owner).*member_ptr_; }
-    constexpr const M&& operator()(const O&& owner) const noexcept { return std::move(owner).*member_ptr_; }
-
-private:
-    M O::*member_ptr_ = nullptr;
+template <class U> struct attribute_set {
+    using type = U;
+    U attributes;
 };
+template <class As> constexpr auto make_attribute_set(As as) { return attribute_set<As>{as}; }
+
+template <class U> struct member_set_info {
+    using type = U;
+    U members;
+};
+template <class Ms> constexpr auto make_members_set(Ms as) { return member_set_info<Ms>{as}; }
 } // namespace detail
 
 template <class T> class info_builder<T, _default> {
 public:
-    template <class U> struct attribute_set {
-        using type = U;
-        U attributes;
-    };
-    template <class U> struct member_set_info {
-        using type = U;
-        U members;
-    };
-
-    // wrap typename string to attribute
-    constexpr attribute<tags::type_name, zstring_view> type_name(zstring_view name) const noexcept { return {name}; }
-
-    // wraps attributes to attribute_set
-    template <class... KS, class... VS>
-    constexpr attribute_set<boost::hana::map<boost::hana::pair<boost::hana::type<KS>, VS>...>>
-    attributes(attribute<KS, VS>... attributes) const {
-        return {boost::hana::make_map(boost::hana::make_pair(boost::hana::type_c<KS>, attributes.value)...)};
+    /// wraps type attributes
+    template <typename... Keys, typename... Values>
+    constexpr auto attributes(tmdesc::attribute<Keys, Values>... attributes) const {
+        return tmdesc::detail::make_attribute_set(
+            hana::make_map(hana::make_pair(hana::type_c<Keys>, attributes.value)...));
     }
 
-    // wraps information about a member
-    // @param name - member name
-    // @param member - pointer to member of target type or pointer to member of target base type
-    template <class M, class U> constexpr auto member(zstring_view name, M U::*member) const {
-        static_assert(std::is_base_of<U, T>{}, "the member must be a pointer to member of T or its base class");
-        M T::*real_memptr = member;
-        return member_info<M, detail::memfn_accessor<M, T>, boost::hana::map<>>{
-            name, detail::memfn_accessor<M, T>{real_memptr}, boost::hana::map<>{}};
+    /// wraps information about members
+    template <typename... ACS, typename... ATS>
+    constexpr auto members(tmdesc::member_info<ACS, ATS>... members_) const {
+        return tmdesc::detail::make_members_set(hana::make_basic_tuple(members_...));
     }
 
-    // wraps information about a member
-    // @param name - member name
-    // @param member - pointer to member of target type or pointer to member of target base type
-    // @param attributes_ - member attributes, the result of the `attributes` function.
-    template <class M, class U, class AS>
-    constexpr auto member(zstring_view name, M U::*member, attribute_set<AS> attributes_) const {
-        static_assert(std::is_base_of<U, T>{}, "the member must be a pointer to member of T or its base class");
-        M T::*real_memptr = member;
-        return member_info<M, detail::memfn_accessor<M, T>, AS>{name, detail::memfn_accessor<M, T>{real_memptr},
-                                                              std::move(attributes_.attributes)};
+    /// wraps information about a member
+    /// @param name - member name
+    /// @param member - pointer to member of target type or pointer to member of target base type or other similar invocable object
+    /// @param attributes - member attributes.
+    template <typename AC, typename... Keys, typename... Values, std::enable_if_t<is_invocable_v<AC, T>, bool> = true>
+    constexpr auto member(zstring_view name, AC member_accessor, attribute<Keys, Values>... attributes) const {
+        using AttributeMap = hana::map<hana::pair<hana::type<Keys>, Values>...>;
+        return member_info<AC, AttributeMap>{name, member_accessor,
+                                             hana::make_map(hana::make_pair(hana::type_c<Keys>, attributes.value)...)};
     }
 
-    // wraps information about member set to single struct
-    template <class... M, class... G, class... A>
-    constexpr member_set_info<boost::hana::basic_tuple<member_info<M, G, A>...>>
-    members(member_info<M, G, A>... members_) const {
-        return {boost::hana::make_basic_tuple(std::move(members_)...)};
+    /// wraps information about a member
+    /// @param name - member name
+    /// @param member - pointer to member of target type or pointer to member of target base type or other similar invocable object
+    /// @param attributes - member attributes as result of info_builder::attributes() call.
+    template <typename AC, typename AS, std::enable_if_t<is_invocable_v<AC, T>, bool> = true>
+    constexpr auto member(zstring_view name, AC member_accessor, detail::member_set_info<AS> attributes) const {
+        return member_info<AC, AS>{name, member_accessor, attributes.attributes};
     }
 
-    // wraps information about type set to single struct
-    // @param member_set_ - type members info,  the result of the `members` function
-    template <class M>
-    constexpr type_info_wrapper<T, boost::hana::optional<M>, boost::hana::optional<>>
-    type(member_set_info<M> member_set_) const {
-        return {boost::hana::just(std::move(member_set_.members)), boost::hana::nothing};
+    /// wraps information about type
+    template <typename AS, typename MS>
+    constexpr auto build(detail::attribute_set<AS> attributes, detail::member_set_info<MS> members) const {
+        return tmdesc::type_info<T, MS, AS>{members.members, attributes.attributes};
     }
-
-    // wraps information about type set to single struct
-    // @param attributes_ - type attributes, the result of the `attributes` function.
-    template <class AS>
-    constexpr type_info_wrapper<T, boost::hana::optional<>, boost::hana::optional<AS>>
-    type(attribute_set<AS> attributes_) const {
-        return {boost::hana::nothing, boost::hana::just(std::move(attributes_.attributes))};
+    /// wraps information about type
+    template <typename AS> constexpr auto build(detail::attribute_set<AS> attributes) const {
+        return tmdesc::type_info<T, hana::basic_tuple<>, AS>(hana::basic_tuple<>{}, attributes.attributes);
     }
-
-    // wraps information about type set to single struct
-    // @param member_set_ - type members info,  the result of the `members` function
-    // @param attributes_ - type attributes, the result of the `attributes` function.
-    template <class AS, class M>
-    constexpr type_info_wrapper<T, boost::hana::optional<M>, boost::hana::optional<AS>>
-    type(attribute_set<AS> attributes_, member_set_info<M> member_set_) const noexcept {
-        return {boost::hana::just(std::move(member_set_.members)),
-                boost::hana::just(std::move(attributes_.attributes))};
+    /// wraps information about type
+    template <typename MS> constexpr auto build(detail::member_set_info<MS> members) const {
+        return tmdesc::type_info<T, MS, hana::map<>>{members.members, hana::map<>{}};
     }
 };
 

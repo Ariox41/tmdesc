@@ -1,4 +1,6 @@
 #include "test_helpers.hpp"
+#include <tmdesc/string_view.hpp>
+#include <string>
 
 static_assert(std::is_nothrow_default_constructible<tmdesc::string_view>{}, "");
 static_assert(std::is_nothrow_copy_constructible<tmdesc::string_view>{}, "");
@@ -62,13 +64,13 @@ TEST_SUITE("string_view") {
             STATIC_CHECK(str.empty());
             STATIC_CHECK(str.begin() == str.end());
             STATIC_CHECK(str == tmdesc::string_view{});
-            STATIC_CHECK(str[str.size()] == '\0');
+            STATIC_CHECK(*(str.c_str() + str.size()) == '\0');
         }
         TEST_CASE("explicit constructor from char*") {
             constexpr tmdesc::zstring_view str("42123");
             STATIC_CHECK(str.size() == 5);
             STATIC_CHECK(str == tmdesc::zstring_view("42123"));
-            STATIC_CHECK(str[str.size()] == '\0');
+            STATIC_CHECK(*(str.c_str() + str.size()) == '\0');
         }
         TEST_CASE("implicit constructor from char*") {
             constexpr tmdesc::zstring_view str = "42123";
@@ -102,18 +104,18 @@ TEST_SUITE("string_view") {
         tmdesc::string_view str = "12345678";
         str.remove_prefix(2);
         CHECK(str == "345678");
-        str.remove_prefix(6);
+        str.remove_prefix_safe(6);
         CHECK(str == "");
-        str.remove_prefix(1);
+        str.remove_prefix_safe(1);
         CHECK(str == "");
     }
     TEST_CASE("remove_suffix") {
         tmdesc::string_view str = "12345678";
         str.remove_suffix(2);
         CHECK(str == "123456");
-        str.remove_suffix(6);
+        str.remove_suffix_safe(6);
         CHECK(str == "");
-        str.remove_suffix(1);
+        str.remove_suffix_safe(1);
         CHECK(str == "");
     }
     TEST_CASE("substr") {
@@ -128,7 +130,7 @@ TEST_SUITE("string_view") {
         CHECK(str == "45");
 
         CHECK(str.substr(0, 2000) == "45");
-        CHECK_THROWS_AS(str.substr(3, 0), std::out_of_range);
+        CHECK(str.substr_safe(3, 0) == tmdesc::string_view{});
     }
     TEST_CASE("string_view starts_with") {
         tmdesc::string_view str = "12345678";
