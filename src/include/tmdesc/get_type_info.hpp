@@ -7,10 +7,12 @@
 
 #pragma once
 #include <boost/hana/chain.hpp>
+#include <boost/hana/contains.hpp>
 #include <boost/hana/find.hpp>
 #include <boost/hana/fold_right.hpp>
 #include <boost/hana/functional/partial.hpp>
 #include <boost/hana/integral_constant.hpp>
+#include <boost/hana/lazy.hpp>
 #include <boost/hana/optional.hpp>
 #include <boost/hana/transform.hpp>
 #include <boost/hana/union.hpp>
@@ -88,6 +90,33 @@ struct get_type_members_info_fn {
  */
 inline constexpr get_type_members_info_fn get_type_members_info{};
 
+struct find_type_attribute_fn {
+    template <class Tag> struct helper {
+        template <class AS> constexpr auto operator()(const AS& attributes) {
+            return hana::find(attributes, hana::type_c<Tag>);
+        }
+    };
+    /**
+     * @brief returns the type attribute, if it exists
+     * @param type - target type
+     * @param attribute_tag - attribute tag
+     * @return an optional attribute value
+     */
+    template <class T, class AttrTag>
+    constexpr auto operator()(hana::basic_type<T> type, hana::basic_type<AttrTag> attribute_tag) const {
+        (void)attribute_tag;
+        return hana::chain(get_type_attributes(type), helper<AttrTag>{});
+    }
+};
+
+/**
+ * @brief A functional object that returns the type attribute, if it exists
+ * @param type - target type
+ * @param attribute_tag - attribute tag
+ * @return an optional attribute value
+ */
+inline constexpr find_type_attribute_fn find_type_attribute{};
+
 namespace detail {
 template <class T> constexpr auto is_type_info(const T&) { return hana::false_c; }
 template <class T, class AC, class AS> constexpr auto is_type_info(const tmdesc::type_info<T, AC, AS>&) {
@@ -97,9 +126,6 @@ template <class T, class AC, class AS> constexpr auto is_type_info(const tmdesc:
 template <typename T, typename = void> struct get_strong_type_info_impl {
     static constexpr const auto& apply() { return boost::hana::nothing; }
 };
-//template <typename T> struct get_strong_type_info_impl<const T> : get_strong_type_info_impl<T> {};
-//template <typename T> struct get_strong_type_info_impl<T&> : get_strong_type_info_impl<T> {};
-//template <typename T> struct get_strong_type_info_impl<T&&> : get_strong_type_info_impl<T> {};
 
 template <class T>
 struct get_strong_type_info_impl<T, std::void_t<decltype(tmdesc_info(tmdesc::info_builder<T, tmdesc::_default>{}))>> {
@@ -116,52 +142,119 @@ struct get_strong_type_info_impl<T, std::void_t<decltype(tmdesc_info(tmdesc::inf
 
 template <class T> inline constexpr auto strong_type_info_cache = get_strong_type_info_impl<T>::apply();
 
-template <class T> inline constexpr auto strong_type_info_or_error = get_type_info(hana::type_c<T>).value();
+template <class T> inline constexpr auto strong_type_info_or_error = strong_type_info_cache<T>.value();
 
-struct get_basic_types_fn {
+struct get_members_helper {
     template <typename T, typename MS, typename AS>
     constexpr auto operator()(const type_info<T, MS, AS>& type_info) const {
-        return hana::find(type_info.attributes(), hana::type_c<attributes::inherits_tag>);
+        return type_info.members();
     }
 };
+struct get_attributes_helper {
+    template <typename T, typename MS, typename AS>
+    constexpr auto operator()(const type_info<T, MS, AS>& type_info) const {
+        return type_info.attributes();
+    }
+};
+template <class T>
+inline constexpr auto strong_type_members_cache = hana::transform(strong_type_info_cache<T>, get_members_helper{});
 
-template <class T> inline constexpr auto basic_types_or_error = get_basic_types_fn{}(*strong_type_info_cache<T>);
+template <class T>
+inline constexpr auto strong_type_attributes_cache = hana::transform(strong_type_info_cache<T>,
+                                                                     get_attributes_helper{});
 
-struct ingerit_attributes_fn {
+template <class T>
+inline constexpr auto inherited_types_or_error = hana::find(strong_type_info_cache<T>.value().attributes(),
+                                                            hana::type_c<attributes::inherits_tag>);
 
+template <class T>
+inline constexpr auto need_flaten_transparent = hana::contains(strong_type_info_cache<T>.value().attributes(),
+                                                               hana::type_c<attributes::flatten_transparent_tag>);
+
+struct inherit_attributes_fn {
     template <class T> struct helper {
         template <class... Bs> constexpr auto operator()(attributes::inherits_tag::basic_types_list<Bs...>) const {
-            auto strong_attributes       = strong_type_info_or_error<T>.attributes();
-            auto clean_strong_attributes = hana::erase_key(strong_attributes, hana::type_c<attributes::inherits_tag>);
-            auto basic_attributes        = hana::make_basic_tuple(strong_type_info_or_error<Bs>.attributes()...);
-            return hana::fold_right(basic_attributes, clean_strong_attributes, hana::union_);
+            auto strong_attributes = strong_type_info_or_error<T>.attributes();
+            //auto clean_strong_attributes = hana::erase_key(strong_attributes, hana::type_c<attributes::inherits_tag>);
+            auto basic_attributes = hana::make_basic_tuple(strong_type_info_or_error<Bs>.attributes()...);
+            return hana::fold_right(basic_attributes, strong_attributes, hana::union_);
         }
     };
 
     template <class T, class MS, class AS> constexpr auto operator()(const type_info<T, MS, AS>& type_info) const {
-        return hana::transform(basic_types_or_error<T>, helper<T>{}).value_or(type_info.attributes());
+        return hana::transform(inherited_types_or_error<T>, helper<T>{}).value_or(type_info.attributes());
     }
 };
-template <class T>
-inline constexpr auto type_attributes_cache = hana::transform(strong_type_info_cache<T>, ingerit_attributes_fn{});
 
-struct inherit_members_fn {
-    template <class T> struct helper {
+template <class T>
+inline constexpr auto type_attributes_cache = hana::transform(strong_type_info_cache<T>, inherit_attributes_fn{});
+
+// template <class T>
+//inline constexpr auto get_type_members_info_or_error = get_type_members_info(hana::type_c<T>).value();
+
+struct flat_members_fn {
+#ifndef TMDESC_CONFIG_DISABLE_FLATTEN_TRANSPARENT
+    template <class T> struct flat_transparent_on_each {
+        struct on_each_member_of_member {
+            template <class OAC, class AC, class AS>
+            constexpr auto operator()(const OAC& owner_accessor, const tmdesc::member_info<AC, AS>& member) const {
+                auto accessor = hana::compose(hana::partial(tmdesc::invoke, member.accessor()), hana::partial(tmdesc::invoke, owner_accessor));
+                return member_info<decltype(accessor), AS>{member.name(), accessor, member.attributes()};
+            }
+        };
+        struct for_each_member_of_member {
+            template <class OAC, class Members>
+            constexpr auto operator()(const OAC& owner_accessor, const Members& members) const {
+                return hana::transform(members, hana::curry<2>(on_each_member_of_member{})(owner_accessor));
+            }
+        };
+
+        struct get_members_of_member {
+            template <class AC, class AS> constexpr auto operator()(const tmdesc::member_info<AC, AS>& member) const {
+                using MemberType = std::decay_t<tmdesc::invoke_result_t<AC, T>>;
+                return hana::transform(get_type_members_info(hana::type_c<MemberType>),
+                                       hana::curry<2>(for_each_member_of_member{})(member.accessor()))
+                    .value_or(hana::make_basic_tuple());
+            }
+        };
+
+        template <class AC, class AS> constexpr auto operator()(const tmdesc::member_info<AC, AS>& member) const {
+            return hana::eval_if(hana::contains(member.attributes(), hana::type_c<attributes::transparent_tag>), //
+                                 hana::make_lazy(get_members_of_member{})(member),
+                                 hana::make_lazy(hana::make_basic_tuple)(member));
+        }
+    };
+    struct flat_transparent_helper {
+        template <class T, class MS> constexpr auto operator()(hana::basic_type<T>, const MS& members) const {
+            return hana::chain(members, flat_transparent_on_each<T>{});
+        }
+    };
+#endif
+    template <class MS> struct inherit_helper {
+        const MS& members;
         template <class... Bs> constexpr auto operator()(attributes::inherits_tag::basic_types_list<Bs...>) const {
             return hana::fold_right(hana::make_basic_tuple(strong_type_info_or_error<Bs>.members()...), //
-                                    strong_type_info_or_error<T>,                                       //
+                                    members,                                                            //
                                     hana::concat                                                        //
             );
         }
     };
 
     template <class T, class MS, class AS> constexpr auto operator()(const type_info<T, MS, AS>& type_info) const {
-        return hana::transform(basic_types_or_error<T>, helper<T>{}).value_or(type_info.members());
+#ifndef TMDESC_CONFIG_DISABLE_FLATTEN_TRANSPARENT
+        auto members = hana::eval_if(need_flaten_transparent<T>,
+                                     hana::make_lazy(flat_transparent_helper{})(hana::type_c<T>, type_info.members()),
+                                     hana::always(type_info.members()));
+#else
+        auto members = type_info.members();
+#endif
+
+        return hana::maybe(members, inherit_helper<decltype(members)>{members}, inherited_types_or_error<T>);
     }
 };
 
 template <class T>
-inline constexpr auto type_members_cache = hana::transform(strong_type_info_cache<T>, inherit_members_fn{});
+inline constexpr auto type_members_cache = hana::transform(strong_type_info_cache<T>, flat_members_fn{});
 
 struct inherit_info_fn {
     template <class T, class MS, class AS> static constexpr type_info<T, MS, AS> make_type_info(MS ms, AS as) {
@@ -177,33 +270,6 @@ struct inherit_info_fn {
 template <class T>
 inline constexpr auto type_info_cache = hana::transform(strong_type_info_cache<T>, inherit_info_fn{});
 
-// struct merge_base_class_info_helper {
-//    template <class... Bs> static constexpr auto get_basic_members(attributes::inherits_tag::basic_types_list<Bs...>) {
-//        return hana::make_basic_tuple(get_strong_type_info_or_error<Bs>.members()...);
-//    }
-//    template <class... Bs>
-//    static constexpr auto get_basic_attributes(attributes::inherits_tag::basic_types_list<Bs...>) {
-//        return hana::make_basic_tuple(get_strong_type_info_or_error<Bs>.attributes()...);
-//    }
-
-//    template <class T, class MS, class AS> constexpr auto operator()(const type_info<T, AS, MS>& base_info) const {
-//        auto strong_types = hana::find(base_info.attributes(), hana::type_c<attributes::inherits_tag>);
-//        if constexpr (strong_types == hana::nothing) {
-//            return base_info;
-//        } else {
-//            auto members = hana::fold_right(get_basic_members(*strong_types), base_info.members(), hana::concat);
-
-//            auto clean_attributes = hana::erase_key(base_info.attributes(), hana::type_c<attributes::inherits_tag>);
-//            auto basic_attributes = get_basic_attributes(*strong_types);
-//            // hana::union_ inserts from left to right
-//            auto attributes = hana::fold_right(basic_attributes, clean_attributes, hana::union_);
-//            return tmdesc::type_info<T, decltype(members), decltype(attributes)>{members, attributes};
-//        }
-//    }
-//};
-
-// template <class T>
-//inline constexpr auto type_info_cache = hana::transform(strong_type_info_cache<T>, merge_base_class_info_helper{});
 } // namespace detail
 
 /**

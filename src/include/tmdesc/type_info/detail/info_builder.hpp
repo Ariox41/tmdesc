@@ -62,7 +62,7 @@ public:
     /// @param member - pointer to member of target type or pointer to member of target base type or other similar invocable object
     /// @param attributes - member attributes as result of info_builder::attributes() call.
     template <typename AC, typename AS, std::enable_if_t<is_invocable_v<AC, T>, bool> = true>
-    constexpr auto member(zstring_view name, AC member_accessor, detail::member_set_info<AS> attributes) const {
+    constexpr auto member(zstring_view name, AC member_accessor, detail::attribute_set<AS> attributes) const {
         return member_info<AC, AS>{name, member_accessor, attributes.attributes};
     }
 

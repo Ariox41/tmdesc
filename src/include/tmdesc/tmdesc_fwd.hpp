@@ -37,7 +37,25 @@ inline constexpr type_name_tag type_name{};
 struct inherits_tag {
     template <typename...> struct basic_types_list {};
 };
+/// Creates an attribute containing a list of inherited types
 template <typename... Ts> inline constexpr attribute<inherits_tag, inherits_tag::basic_types_list<Ts...>> inherits;
+
+struct transparent_tag {
+    constexpr attribute<transparent_tag, transparent_tag> operator()() const { return {}; }
+};
+
+/// Indicates the "transparency" of a member in the tree.
+/// In a way, this is the equivalent of inheritance expressed through aggregation.
+/// Unlike inheritance, transparency is not applied by default (it would be expensive),
+/// you need to specify the `flatten_transparent` attribute for the type.
+inline constexpr transparent_tag transparent{};
+
+struct flatten_transparent_tag {
+    constexpr attribute<flatten_transparent_tag, flatten_transparent_tag> operator()() const { return {}; }
+};
+/// Indicates the need to flatten `transparent` type members, similar to inheritance.
+inline constexpr flatten_transparent_tag flatten_transparent{};
+
 } // namespace attributes
 
 /** Type info builder interface
