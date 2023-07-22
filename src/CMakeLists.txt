@@ -12,5 +12,10 @@ if(DEFINED TMDESC_IS_MAIN_PROJECT)
         # IDE development target (works in QtCreator an msvs)
         file(GLOB_RECURSE TM_DESK_ALL_HEADERS "*.hpp")
         add_custom_target(${PROJECT_NAME}_IDE SOURCES ${TM_DESK_ALL_HEADERS})
-    endif()
+
+target_sources(tmdesc_IDE
+  PRIVATE
+    include/tmdesc/config.hpp
+)
+endif()
 endif()

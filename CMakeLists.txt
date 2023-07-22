@@ -13,7 +13,7 @@ endif()
 add_subdirectory(src)
 
 if(TMDESC_IS_MAIN_PROJECT)
-    #add_subdirectory(compilation_bench)
+    add_subdirectory(compilation_bench)
 
     add_subdirectory(examples)
 
