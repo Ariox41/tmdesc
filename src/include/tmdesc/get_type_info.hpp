@@ -127,11 +127,16 @@ struct get_strong_type_attributes_fn {
 };
 TMDESC_INLINE_VARIABLE constexpr get_strong_type_attributes_fn get_strong_type_attributes{};
 
+// ====================================
+// ========== IMPLEMENTATION ==========
+// ====================================
+
 namespace detail {
-template <class T> constexpr auto is_type_info(const T&) { return hana::false_c; }
-template <class T, class AC, class AS> constexpr auto is_type_info(const tmdesc::type_info<T, AC, AS>&) {
+
+template <class T, class U> constexpr hana::false_ check_type_info(const U&) { return hana::false_c; };
+template <class T, class AC, class AS> constexpr hana::true_ check_type_info(const tmdesc::type_info<T, AC, AS>&) {
     return hana::true_c;
-}
+};
 
 template <typename T, typename = void> struct get_strong_type_info_impl {
     static constexpr const auto& apply() { return boost::hana::nothing; }
@@ -145,7 +150,10 @@ struct get_strong_type_info_impl<T, std::void_t<decltype(tmdesc_info(tmdesc::inf
     // if a free function is defined in the type namespace, it will be called correctly.
     static constexpr auto apply() {
         constexpr auto info = tmdesc_info(tmdesc::info_builder<T, ::tmdesc::_default>{});
-        static_assert(detail::is_type_info(info), "");
+        static_assert(detail::check_type_info<T>(info),
+                      "The tmdesc_info function should return a value of type tmdesc::type_info<T, unspecified>, "
+                      "obtained as a result of calling tmdesc_info<T, unspecified>::build()");
+
         return boost::hana::just(std::move(info));
     }
 };

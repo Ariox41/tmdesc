@@ -88,7 +88,7 @@ struct transparent_aggregation {
                                           tmdesc::attributes::flatten_transparent()),                           //
                           type.members(type.member("M0", &Self::m0),                                            //
                                        type.member("_", &Self::transparent, tmdesc::attributes::transparent()), //
-                                       type.member("_", &Self::m5, tmdesc::attributes::transparent()),//
+                                       type.member("_", &Self::m5, tmdesc::attributes::transparent()),          //
                                        type.member("M6", &Self::m6, attributes::name_in_lowercase())));
     }
 };
