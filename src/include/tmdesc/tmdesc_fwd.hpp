@@ -6,6 +6,7 @@
 // https://github.com/Ariox41/tmdesc
 
 #pragma once
+#include <tmdesc/config.hpp>
 namespace tmdesc {
 
 class string_view;
@@ -32,13 +33,13 @@ struct type_name_tag {
     // #include <tmdesc/attributes.hpp>
     constexpr attribute<type_name_tag, zstring_view> operator()(zstring_view str) const noexcept;
 };
-inline constexpr type_name_tag type_name{};
+TMDESC_INLINE_VARIABLE constexpr type_name_tag type_name{};
 
 struct inherits_tag {
-    template <typename...> struct basic_types_list {};
+    template <typename...> struct inherited_types_list {};
 };
 /// Creates an attribute containing a list of inherited types
-template <typename... Ts> inline constexpr attribute<inherits_tag, inherits_tag::basic_types_list<Ts...>> inherits;
+template <typename... Ts> inline constexpr attribute<inherits_tag, inherits_tag::inherited_types_list<Ts...>> inherits;
 
 struct transparent_tag {
     constexpr attribute<transparent_tag, transparent_tag> operator()() const { return {}; }
@@ -48,13 +49,13 @@ struct transparent_tag {
 /// In a way, this is the equivalent of inheritance expressed through aggregation.
 /// Unlike inheritance, transparency is not applied by default (it would be expensive),
 /// you need to specify the `flatten_transparent` attribute for the type.
-inline constexpr transparent_tag transparent{};
+TMDESC_INLINE_VARIABLE constexpr transparent_tag transparent{};
 
 struct flatten_transparent_tag {
     constexpr attribute<flatten_transparent_tag, flatten_transparent_tag> operator()() const { return {}; }
 };
-/// Indicates the need to flatten `transparent` type members, similar to inheritance.
-inline constexpr flatten_transparent_tag flatten_transparent{};
+/// Indicates that transparent members should be flattened, similar to inheritance.
+TMDESC_INLINE_VARIABLE constexpr flatten_transparent_tag flatten_transparent{};
 
 } // namespace attributes
 

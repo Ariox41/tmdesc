@@ -26,10 +26,10 @@
 
 #ifdef __cpp_inline_variables
 #if __cpp_inline_variables >= 201606L
-#define TMDESC_INLINE_VARIABLES inline
+#define TMDESC_INLINE_VARIABLE inline
 #else
-#define TMDESC_INLINE_VARIABLES /*nothing*/
+#define TMDESC_INLINE_VARIABLE /*nothing*/
 #endif
 #else
-#define TMDESC_INLINE_VARIABLES /*nothing*/
+#define TMDESC_INLINE_VARIABLE /*nothing*/
 #endif
