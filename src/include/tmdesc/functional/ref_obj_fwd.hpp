@@ -1,7 +1,13 @@
+// Copyright Victor Smirnov 2021-2023
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+//
+// The documentation can be found at the library's page:
+// https://github.com/Ariox41/tmdesc
+
 #pragma once
 
-// for forward declaration of reference_wrapper and for decay_t
-#include <type_traits>
+#include <type_traits> // for forward declaration of reference_wrapper and for decay_t
 namespace tmdesc {
 /**
  * @brief Represents reference as object with address and copy constructor/assignment.
