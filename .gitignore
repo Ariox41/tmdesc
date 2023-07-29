@@ -43,3 +43,4 @@ build-*/
 docs/
 CMakeUserPresets.json
 
+__pycache__
