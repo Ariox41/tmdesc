@@ -35,10 +35,11 @@
 *.user
 CMakeLists.txt.user.*
 # vs code local configuration
-/.vscode/*
+.vscode/
 
 # default build dirrectory
-/build/*
-/build*/*
-/docs/*
+build/
+build-*/
+docs/
+CMakeUserPresets.json
 

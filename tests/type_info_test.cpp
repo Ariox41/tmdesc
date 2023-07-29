@@ -144,7 +144,9 @@ TEST_SUITE("type name info") {
         STATIC_CHECK(hana::find(m4.attributes(), hana::type_c<ns::attributes::name_in_lowercase_tag>) ==
                      hana::just(true));
 
-        STATIC_CHECK(tmdesc::invoke(m1.accessor(), value) == -1);
+        constexpr auto m1_accessor = m1.accessor();
+        constexpr auto m1_value = tmdesc::invoke(m1.accessor(), value);
+        STATIC_CHECK(m1_value == -1);
         STATIC_CHECK(tmdesc::invoke(m2.accessor(), value) == 10);
         STATIC_CHECK(tmdesc::invoke(m3.accessor(), value) == 100);
         STATIC_CHECK(tmdesc::invoke(m4.accessor(), value) == 1000);

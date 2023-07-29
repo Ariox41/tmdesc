@@ -8,7 +8,8 @@
 #endif
 #endif
 
-#if __cplusplus < 201400
+
+#if __cplusplus < 201400L && _MSVC_LANG < 201400L
 #error "C++14 or better is required"
 #endif
 

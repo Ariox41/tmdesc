@@ -243,6 +243,7 @@ public:
     using basic_string_view::basic_string_view;
     using basic_string_view::operator=;
 
+    string_view() = default;
     string_view(const string_view&)            = default;
     string_view& operator=(const string_view&) = default;
 
