@@ -39,7 +39,8 @@ struct inherits_tag {
     template <typename...> struct inherited_types_list {};
 };
 /// Creates an attribute containing a list of inherited types
-template <typename... Ts> inline constexpr attribute<inherits_tag, inherits_tag::inherited_types_list<Ts...>> inherits;
+template <typename... Ts>
+TMDESC_INLINE_VARIABLE constexpr attribute<inherits_tag, inherits_tag::inherited_types_list<Ts...>> inherits;
 
 struct transparent_tag {
     constexpr attribute<transparent_tag, transparent_tag> operator()() const { return {}; }

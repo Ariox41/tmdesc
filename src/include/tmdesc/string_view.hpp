@@ -73,7 +73,7 @@ public:
     constexpr basic_string_view(const char* cstr) noexcept
       : basic_string_view(cstr, cstringsize(cstr)) {}
 
-    template <typename T, std::enable_if_t<std::is_base_of_v<std::string, T>, bool> = true>
+    template <typename T, std::enable_if_t<std::is_base_of<std::string, T>::value, bool> = true>
     constexpr basic_string_view(const T& src) noexcept
       : basic_string_view{src.data(), src.size()} {}
 
@@ -246,7 +246,7 @@ public:
     string_view(const string_view&)            = default;
     string_view& operator=(const string_view&) = default;
 
-    template <typename T, std::enable_if_t<std::is_base_of_v<std::string, T>, bool> = true>
+    template <typename T, std::enable_if_t<std::is_base_of<std::string, T>::value, bool> = true>
     string_view(const T& src) noexcept
       : string_view{src.data(), src.size()} {}
 
@@ -341,7 +341,7 @@ public:
     /// size() == src.size()
     /// c_str() == src.c_str()
     /// (*this)[size()] == '\0'
-    template <typename T, std::enable_if_t<std::is_base_of_v<std::string, T>, bool> = true>
+    template <typename T, std::enable_if_t<std::is_base_of<std::string, T>::value, bool> = true>
     zstring_view(const T& src) noexcept
       : string_view{src.c_str(), src.size()} {}
 

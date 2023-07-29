@@ -4,6 +4,17 @@
 namespace ns {
 using tmdesc::attributes::inherits;
 using tmdesc::attributes::type_name;
+
+namespace attributes {
+
+struct name_in_lowercase_tag {
+    constexpr ::tmdesc::attribute<name_in_lowercase_tag, bool> operator()(bool b = true) const { return {b}; }
+};
+
+TMDESC_INLINE_VARIABLE constexpr name_in_lowercase_tag name_in_lowercase{};
+
+} // namespace attributes
+
 struct struct_with_typename_only {
     int undescribed_member = 42;
 
@@ -41,16 +52,6 @@ template <class Impl> constexpr auto tmdesc_info(tmdesc::info_builder<multiply_v
     );
 }
 
-namespace attributes {
-
-struct name_in_lowercase_tag {
-    constexpr ::tmdesc::attribute<name_in_lowercase_tag, bool> operator()(bool b = true) const { return {b}; }
-};
-
-inline constexpr name_in_lowercase_tag name_in_lowercase{};
-
-} // namespace attributes
-
 struct multiple_values_with_attributes {
     int m1;
     char m2;
@@ -75,6 +76,10 @@ struct inheritor : multiple_values_with_attributes {
             type.attributes(type_name("inheritor"), inherits<multiple_values_with_attributes>), //
             type.members(type.member("M4", &Self::m4, type_name("int"), attributes::name_in_lowercase())));
     }
+
+    constexpr inheritor(multiple_values_with_attributes base_, int m4_)
+      : multiple_values_with_attributes{base_}
+      , m4{m4_} {}
 };
 
 struct transparent_aggregation {

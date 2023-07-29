@@ -5,12 +5,13 @@
 # This file is part of the simple compile-time benchmark tools for the tmdesc library. 
 # The original idea is taken from https://github.com/ldionne/metabench
 
-find_package(Ruby 2.4 QUIET)
+find_package(Ruby
+    2.4 QUIET
+)
+
 if(NOT RUBY_EXECUTABLE) 
     message(INFO "Ruby >= 2.4 was not found; the metabench.cmake module can't be used.")
 endif()
-
-set(TMDESC_METABENCH_SELF_FILE_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 # Global target for bench all
 add_custom_target(tmdesc_metabench_all)
@@ -62,7 +63,7 @@ function (tmdesc_metabench_add_dataset target erb_template_src dataset_generator
     set(measured_cpp_file_path "${CMAKE_CURRENT_BINARY_DIR}/metabench/${target}/measured.cpp")
 
     # Source files
-    set(ruby_bench_impl_src "${TMDESC_METABENCH_SELF_FILE_DIR}/metabench.rb")
+    set(ruby_bench_impl_src "${CMAKE_CURRENT_LIST_DIR}/metabench.rb")
     set(ruby_compile_impl_src "${CMAKE_CURRENT_BINARY_DIR}/metabench/${target}/metabench_compile.rb")
 
     file(GENERATE OUTPUT "${ruby_compile_impl_src}" CONTENT "                         \n\

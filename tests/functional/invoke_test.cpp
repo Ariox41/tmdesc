@@ -133,7 +133,7 @@ struct multi_arg_fn{
         return v1 + v2 + v3 +v4 +v5;
     }
 };
-inline constexpr multi_arg_fn multi_arg;
+TMDESC_INLINE_VARIABLE constexpr multi_arg_fn multi_arg;
 TEST_CASE("invoke ref_obj as function") {
     CHECK(tmdesc::invoke(multi_arg, 1, 2, 3, 4, 5) == 1 + 2 + 3 +  4 + 5);
 }
