@@ -145,7 +145,7 @@ TEST_SUITE("type name info") {
                      hana::just(true));
 
         constexpr auto m1_accessor = m1.accessor();
-        constexpr auto m1_value = tmdesc::invoke(m1.accessor(), value);
+        constexpr auto m1_value = tmdesc::invoke(m1_accessor, value);
         STATIC_CHECK(m1_value == -1);
         STATIC_CHECK(tmdesc::invoke(m2.accessor(), value) == 10);
         STATIC_CHECK(tmdesc::invoke(m3.accessor(), value) == 100);
